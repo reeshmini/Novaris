@@ -10833,7 +10833,6 @@ with main_col:
             st.button(
                 "→",
                 key="open_whale_alerts_page",
-                help="Open Whale Alerts",
                 on_click=set_nav_view,
                 args=("whales",),
             )
@@ -10853,7 +10852,6 @@ with main_col:
             st.button(
                 "→",
                 key="open_eth_market_page",
-                help="Open Ethereum Market",
                 on_click=set_nav_view,
                 args=("market",),
             )
@@ -10873,7 +10871,6 @@ with main_col:
             st.button(
                 "→",
                 key="open_btc_market_page",
-                help="Open Bitcoin Market",
                 on_click=set_nav_view,
                 args=("market",),
             )
