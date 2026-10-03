@@ -1,4 +1,5 @@
 import html
+import hashlib
 import re
 import time
 from datetime import datetime, timezone
@@ -12,6 +13,7 @@ import plotly.graph_objects as go
 import requests
 import streamlit as st
 from dotenv import dotenv_values
+from sqlalchemy import create_engine, text
 
 
 # =========================================================
@@ -34,6 +36,10 @@ except Exception:
 
 ETHERSCAN_API_KEY = (env_vars.get("ETHERSCAN_API_KEY") or "").strip()
 GNEWS_API_KEY = (env_vars.get("GNEWS_API_KEY") or "").strip()
+
+# PostgreSQL / Neon.
+# Keep DATABASE_URL in Streamlit Secrets or local .env only.
+DATABASE_URL = (env_vars.get("DATABASE_URL") or "").strip()
 
 DEFAULT_ETH_WATCH = (env_vars.get("DEFAULT_ETH_WATCH") or "").strip()
 DEFAULT_BTC_WATCH = (env_vars.get("DEFAULT_BTC_WATCH") or "").strip()
@@ -6338,6 +6344,323 @@ Latest Blockchain News.
 # =========================================================
 # HELPERS
 # =========================================================
+
+# =========================================================
+# PHASE 1 POSTGRESQL PERSISTENCE
+# =========================================================
+# The existing NOVARIS dashboard continues to use its current
+# DataFrame/session-state flow. Fresh blockchain scans are also
+# persisted to PostgreSQL so storage can be verified safely.
+
+@st.cache_resource
+def get_db_engine():
+    """Create one reusable SQLAlchemy engine for this Streamlit process."""
+    if not DATABASE_URL:
+        return None
+
+    return create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_recycle=300,
+    )
+
+
+db_engine = get_db_engine()
+
+
+def database_available():
+    """Return True when PostgreSQL is configured and reachable."""
+    if db_engine is None:
+        return False
+
+    try:
+        with db_engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        return False
+
+
+def _db_value(value):
+    """Convert pandas/numpy scalar values into DB-friendly Python values."""
+    if value is None:
+        return None
+
+    try:
+        if pd.isna(value):
+            return None
+    except Exception:
+        pass
+
+    if hasattr(value, "item") and not isinstance(value, (str, bytes)):
+        try:
+            value = value.item()
+        except Exception:
+            pass
+
+    if isinstance(value, pd.Timestamp):
+        return value.to_pydatetime()
+
+    return value
+
+
+def make_event_key(row):
+    """Build a stable identity for one monitored transfer/event."""
+    amount = _db_value(row.get("amount_native"))
+
+    if isinstance(amount, float):
+        amount_text = format(amount, ".18g")
+    else:
+        amount_text = str(amount or "")
+
+    parts = [
+        str(row.get("chain") or "").strip().lower(),
+        str(row.get("tx_hash") or "").strip().lower(),
+        str(row.get("asset_symbol") or "").strip().upper(),
+        str(row.get("from") or "").strip().lower(),
+        str(row.get("to") or "").strip().lower(),
+        amount_text,
+    ]
+
+    return hashlib.sha256("|".join(parts).encode("utf-8")).hexdigest()
+
+
+def create_scan_run(
+    eth_blocks,
+    btc_blocks,
+    btc_txs_per_block,
+    include_erc20,
+    transaction_count,
+    warnings,
+):
+    """Create one record describing a fresh NOVARIS network scan."""
+    if db_engine is None:
+        return None
+
+    sql = text("""
+        INSERT INTO scan_runs (
+            eth_blocks,
+            btc_blocks,
+            btc_txs_per_block,
+            include_erc20,
+            transaction_count,
+            warning_text
+        )
+        VALUES (
+            :eth_blocks,
+            :btc_blocks,
+            :btc_txs_per_block,
+            :include_erc20,
+            :transaction_count,
+            :warning_text
+        )
+        RETURNING id
+    """)
+
+    with db_engine.begin() as connection:
+        result = connection.execute(
+            sql,
+            {
+                "eth_blocks": int(eth_blocks),
+                "btc_blocks": int(btc_blocks),
+                "btc_txs_per_block": int(btc_txs_per_block),
+                "include_erc20": bool(include_erc20),
+                "transaction_count": int(transaction_count),
+                "warning_text": "\n".join(str(x) for x in (warnings or [])) or None,
+            },
+        )
+        return int(result.scalar_one())
+
+
+def save_transactions_to_db(df, scan_id):
+    """Upsert the scored/fused network snapshot into PostgreSQL."""
+    if db_engine is None or scan_id is None or df is None or df.empty:
+        return 0
+
+    sql = text("""
+        INSERT INTO transactions (
+            event_key,
+            chain,
+            tx_hash,
+            asset_symbol,
+            asset_name,
+            timestamp,
+            from_address,
+            to_address,
+            direction,
+            amount_native,
+            amount_usd,
+            source_type,
+            watch_address,
+            event_note,
+            base_score,
+            risk_level,
+            alert_flag,
+            anomaly_reason,
+            news_sentiment_score,
+            fear_greed_score,
+            combined_sentiment_score,
+            combined_sentiment_label,
+            final_score,
+            final_risk,
+            final_explanation,
+            first_seen_scan_id,
+            last_seen_scan_id
+        )
+        VALUES (
+            :event_key,
+            :chain,
+            :tx_hash,
+            :asset_symbol,
+            :asset_name,
+            :timestamp,
+            :from_address,
+            :to_address,
+            :direction,
+            :amount_native,
+            :amount_usd,
+            :source_type,
+            :watch_address,
+            :event_note,
+            :base_score,
+            :risk_level,
+            :alert_flag,
+            :anomaly_reason,
+            :news_sentiment_score,
+            :fear_greed_score,
+            :combined_sentiment_score,
+            :combined_sentiment_label,
+            :final_score,
+            :final_risk,
+            :final_explanation,
+            :scan_id,
+            :scan_id
+        )
+        ON CONFLICT (event_key)
+        DO UPDATE SET
+            amount_usd = EXCLUDED.amount_usd,
+            base_score = EXCLUDED.base_score,
+            risk_level = EXCLUDED.risk_level,
+            alert_flag = EXCLUDED.alert_flag,
+            anomaly_reason = EXCLUDED.anomaly_reason,
+            news_sentiment_score = EXCLUDED.news_sentiment_score,
+            fear_greed_score = EXCLUDED.fear_greed_score,
+            combined_sentiment_score = EXCLUDED.combined_sentiment_score,
+            combined_sentiment_label = EXCLUDED.combined_sentiment_label,
+            final_score = EXCLUDED.final_score,
+            final_risk = EXCLUDED.final_risk,
+            final_explanation = EXCLUDED.final_explanation,
+            last_seen_at = NOW(),
+            last_seen_scan_id = EXCLUDED.last_seen_scan_id
+    """)
+
+    records = []
+
+    for _, row in df.iterrows():
+        chain = str(row.get("chain") or "").strip()
+        tx_hash = str(row.get("tx_hash") or "").strip()
+
+        if not chain or not tx_hash:
+            continue
+
+        timestamp = pd.to_datetime(
+            row.get("timestamp"),
+            utc=True,
+            errors="coerce",
+        )
+        if pd.isna(timestamp):
+            continue
+
+        alert_flag = _db_value(row.get("alert_flag"))
+        if alert_flag is not None:
+            alert_flag = bool(alert_flag)
+
+        records.append(
+            {
+                "event_key": make_event_key(row),
+                "chain": chain,
+                "tx_hash": tx_hash,
+                "asset_symbol": _db_value(row.get("asset_symbol")),
+                "asset_name": _db_value(row.get("asset_name")),
+                "timestamp": timestamp.to_pydatetime(),
+                "from_address": _db_value(row.get("from")),
+                "to_address": _db_value(row.get("to")),
+                "direction": _db_value(row.get("direction")),
+                "amount_native": _db_value(row.get("amount_native")),
+                "amount_usd": _db_value(row.get("amount_usd")),
+                "source_type": _db_value(row.get("source_type")),
+                "watch_address": _db_value(row.get("watch_address")),
+                "event_note": _db_value(row.get("event_note")),
+                "base_score": _db_value(row.get("base_score")),
+                "risk_level": _db_value(row.get("risk_level")),
+                "alert_flag": alert_flag,
+                "anomaly_reason": _db_value(row.get("anomaly_reason")),
+                "news_sentiment_score": _db_value(row.get("news_sentiment_score")),
+                "fear_greed_score": _db_value(row.get("fear_greed_score")),
+                "combined_sentiment_score": _db_value(
+                    row.get("combined_sentiment_score")
+                ),
+                "combined_sentiment_label": _db_value(
+                    row.get("combined_sentiment_label")
+                ),
+                "final_score": _db_value(row.get("final_score")),
+                "final_risk": _db_value(row.get("final_risk")),
+                "final_explanation": _db_value(row.get("final_explanation")),
+                "scan_id": int(scan_id),
+            }
+        )
+
+    if not records:
+        return 0
+
+    with db_engine.begin() as connection:
+        connection.execute(sql, records)
+
+    return len(records)
+
+
+def persist_network_snapshot(
+    df,
+    eth_blocks,
+    btc_blocks,
+    btc_txs_per_block,
+    include_erc20,
+    warnings,
+):
+    """
+    Persist a fresh network scan without making the dashboard depend on the DB.
+    Any DB problem is captured in session state so the current UI keeps working.
+    """
+    if db_engine is None:
+        st.session_state.db_last_error = (
+            "DATABASE_URL is not configured; PostgreSQL persistence is disabled."
+        )
+        return None
+
+    try:
+        scan_id = create_scan_run(
+            eth_blocks=eth_blocks,
+            btc_blocks=btc_blocks,
+            btc_txs_per_block=btc_txs_per_block,
+            include_erc20=include_erc20,
+            transaction_count=0 if df is None else len(df),
+            warnings=warnings,
+        )
+
+        stored_count = save_transactions_to_db(df, scan_id)
+
+        st.session_state.db_last_scan_id = scan_id
+        st.session_state.db_last_stored_count = stored_count
+        st.session_state.db_last_saved_at = time.time()
+        st.session_state.db_last_error = ""
+
+        return scan_id
+
+    except Exception as exc:
+        st.session_state.db_last_error = str(exc)
+        return None
+
+
 def empty_alert_df():
     return pd.DataFrame(columns=REQUIRED_COLUMNS)
 
@@ -9035,6 +9358,18 @@ if need_network:
         )
         st.session_state.network_final_df = network_final
         st.session_state.network_fusion_signature = fusion_signature
+
+        # Phase 1: write only genuinely fresh blockchain scans to PostgreSQL.
+        # Normal navigation reruns do not create new scan records.
+        if network_refreshed:
+            persist_network_snapshot(
+                df=network_final,
+                eth_blocks=eth_blocks,
+                btc_blocks=btc_blocks,
+                btc_txs_per_block=btc_txs_per_block,
+                include_erc20=auto_erc20,
+                warnings=st.session_state.network_warnings,
+            )
 
 network_final = st.session_state.network_final_df
 network_warnings = list(st.session_state.network_warnings)
