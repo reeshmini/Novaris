@@ -45,24 +45,28 @@ DEFAULT_ETH_WATCH = (env_vars.get("DEFAULT_ETH_WATCH") or "").strip()
 DEFAULT_BTC_WATCH = (env_vars.get("DEFAULT_BTC_WATCH") or "").strip()
 
 WHALE_THRESHOLD_USD = float((env_vars.get("WHALE_THRESHOLD_USD") or "1000000").strip())
-NETWORK_ETH_BLOCKS = int((env_vars.get("NETWORK_ETH_BLOCKS") or "1").strip())
-NETWORK_BTC_BLOCKS = int((env_vars.get("NETWORK_BTC_BLOCKS") or "4").strip())
+NETWORK_ETH_BLOCKS = int((env_vars.get("NETWORK_ETH_BLOCKS") or "3").strip())
+NETWORK_BTC_BLOCKS = int((env_vars.get("NETWORK_BTC_BLOCKS") or "8").strip())
 BTC_NETWORK_TXS_PER_BLOCK = int((env_vars.get("BTC_NETWORK_TXS_PER_BLOCK") or "20").strip())
 WATCH_TX_LIMIT = int((env_vars.get("WATCH_TX_LIMIT") or "15").strip())
 
-# Controlled refresh intervals for expensive external data.
-# Navigation reruns reuse st.session_state and do not call these APIs again
-# until the corresponding interval has elapsed.
+# Controlled refresh intervals for external data.
+# Navigation reruns reuse st.session_state. Blockchain indexing has its own
+# bounded Home freshness gate defined by AUTO_INDEX_REFRESH_SECONDS below.
 NETWORK_REFRESH_SECONDS = int((env_vars.get("NETWORK_REFRESH_SECONDS") or "120").strip())
 MARKET_REFRESH_SECONDS = int((env_vars.get("MARKET_REFRESH_SECONDS") or "120").strip())
 NEWS_REFRESH_SECONDS = int((env_vars.get("NEWS_REFRESH_SECONDS") or "300").strip())
 
-# Final deployment mode: keep blockchain ingestion explicit so Streamlit
-# navigation remains fast. Set AUTO_INDEX_ON_SESSION_START=true only if you
-# prefer one blocking blockchain index pass whenever a new browser session starts.
-AUTO_INDEX_ON_SESSION_START = (
-    (env_vars.get("AUTO_INDEX_ON_SESSION_START") or "false").strip().lower()
-    in {"1", "true", "yes", "on"}
+# Final deployment mode:
+# - Automatically index the newest bounded block window once when a new
+#   browser session starts.
+# - During an active session, NOVARIS can re-check when Home is revisited
+#   after the freshness interval below.
+# - This is NOT background ingestion: no work runs while Streamlit is asleep
+#   and no polling thread is created.
+AUTO_INDEX_ON_SESSION_START = True
+AUTO_INDEX_REFRESH_SECONDS = int(
+    (env_vars.get("AUTO_INDEX_REFRESH_SECONDS") or "600").strip()
 )
 
 ETH_RPC_URLS = [x.strip() for x in (env_vars.get("ETH_RPC_URLS") or "").split(",") if x.strip()]
@@ -6988,387 +6992,6 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
-
-/* =========================================================
-   HOME LATEST TRANSFERS — TRANSACTION DETAIL BUTTONS
-   ========================================================= */
-
-.home-transfer-card-shell {
-    position: relative !important;
-    width: 100% !important;
-}
-
-/* Reserve space at the lower-right for the detail control. */
-.home-transfer-card-shell .alert-card {
-    position: relative !important;
-    cursor: default !important;
-    padding-right: 58px !important;
-}
-
-/* The row/card itself is not a navigation target. */
-.home-transfer-card-shell .alert-card,
-.home-transfer-card-shell .alert-row,
-.home-transfer-card-shell .alert-left,
-.home-transfer-card-shell .alert-content {
-    cursor: default !important;
-}
-
-/* Keep the existing card visual treatment without suggesting full-card clickability. */
-.home-transfer-card-shell .alert-card:hover {
-    transform: none !important;
-}
-
-/* Premium transaction detail button. */
-.home-transfer-detail-button,
-.home-transfer-detail-button:visited,
-.home-transfer-detail-button:hover,
-.home-transfer-detail-button:active {
-    position: absolute !important;
-    right: 12px !important;
-    bottom: 12px !important;
-    z-index: 30 !important;
-
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-
-    width: 36px !important;
-    min-width: 36px !important;
-    height: 36px !important;
-    min-height: 36px !important;
-
-    padding: 0 !important;
-    margin: 0 !important;
-
-    border-radius: 999px !important;
-    border: 1px solid rgba(240,184,70,0.46) !important;
-
-    background:
-        radial-gradient(
-            circle at 34% 24%,
-            rgba(255,220,145,0.11),
-            rgba(255,178,30,0.045) 35%,
-            transparent 60%
-        ),
-        linear-gradient(
-            180deg,
-            rgba(27,24,18,0.99) 0%,
-            rgba(10,9,7,1) 100%
-        ) !important;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,237,193,0.10),
-        inset 0 -1px 0 rgba(255,178,30,0.04),
-        0 0 0 1px rgba(255,178,30,0.025),
-        0 0 10px rgba(255,178,30,0.10),
-        0 6px 15px rgba(0,0,0,0.34) !important;
-
-    color: #F6C45F !important;
-    text-decoration: none !important;
-    cursor: pointer !important;
-
-    transition:
-        transform 0.18s ease,
-        border-color 0.18s ease,
-        background 0.18s ease,
-        box-shadow 0.18s ease !important;
-}
-
-/* Subtle inner ring. */
-.home-transfer-detail-button::before {
-    content: "" !important;
-    position: absolute !important;
-    inset: 3px !important;
-    border-radius: 999px !important;
-    border: 1px solid rgba(255,210,112,0.075) !important;
-    pointer-events: none !important;
-}
-
-.home-transfer-detail-arrow {
-    position: relative !important;
-    z-index: 2 !important;
-
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-
-    color: #F6C45F !important;
-    font-family: Inter, "Segoe UI Symbol", Arial, sans-serif !important;
-    font-size: 1.30rem !important;
-    font-weight: 650 !important;
-    line-height: 1 !important;
-
-    transform: translate(-0.5px, -1px) !important;
-
-    text-shadow:
-        0 0 4px rgba(246,196,95,0.30),
-        0 0 8px rgba(255,178,30,0.12) !important;
-
-    transition:
-        transform 0.18s ease,
-        color 0.18s ease,
-        text-shadow 0.18s ease !important;
-}
-
-.home-transfer-detail-button:hover,
-.home-transfer-detail-button:focus-visible {
-    transform: translateY(-1px) !important;
-    border-color: rgba(255,211,106,0.72) !important;
-
-    background:
-        radial-gradient(
-            circle at 34% 24%,
-            rgba(255,229,165,0.16),
-            rgba(255,178,30,0.08) 36%,
-            transparent 60%
-        ),
-        linear-gradient(
-            180deg,
-            rgba(37,30,18,0.99) 0%,
-            rgba(13,10,7,1) 100%
-        ) !important;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,240,202,0.14),
-        0 0 0 1px rgba(255,178,30,0.05),
-        0 0 14px rgba(255,178,30,0.18),
-        0 8px 19px rgba(0,0,0,0.40) !important;
-
-    outline: none !important;
-}
-
-.home-transfer-detail-button:hover .home-transfer-detail-arrow,
-.home-transfer-detail-button:focus-visible .home-transfer-detail-arrow {
-    color: #FFD978 !important;
-    transform: translate(1px, -1px) !important;
-
-    text-shadow:
-        0 0 5px rgba(255,217,120,0.40),
-        0 0 10px rgba(255,178,30,0.16) !important;
-}
-
-.home-transfer-detail-button:active {
-    transform: scale(0.96) !important;
-}
-
-/* Maintain clean spacing on narrower screens. */
-@media (max-width: 1200px) {
-    .home-transfer-card-shell .alert-card {
-        padding-right: 54px !important;
-    }
-
-    .home-transfer-detail-button,
-    .home-transfer-detail-button:visited,
-    .home-transfer-detail-button:hover,
-    .home-transfer-detail-button:active {
-        right: 10px !important;
-        bottom: 10px !important;
-        width: 34px !important;
-        min-width: 34px !important;
-        height: 34px !important;
-        min-height: 34px !important;
-    }
-
-    .home-transfer-detail-arrow {
-        font-size: 1.22rem !important;
-    }
-}
-
-
-/* =========================================================
-   FULL WHALE ALERTS / LATEST TRANSFERS — BUTTON-ONLY DETAILS
-   ========================================================= */
-
-/* Same centred width previously applied to full-alert anchor wrappers. */
-.full-alert-card-shell {
-    position: relative !important;
-    width: var(--novaris-detail-page-width) !important;
-    max-width: 1280px !important;
-    margin: 0 auto 14px auto !important;
-    box-sizing: border-box !important;
-}
-
-.full-alert-card-shell .alert-card {
-    position: relative !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    margin-bottom: 0 !important;
-    padding-right: 76px !important;
-    cursor: default !important;
-}
-
-/* Full cards are informational; only the button signals interaction. */
-.full-alert-card-shell .alert-card:hover {
-    transform: none !important;
-}
-
-.full-alert-card-shell .alert-row,
-.full-alert-card-shell .alert-left,
-.full-alert-card-shell .alert-content {
-    cursor: default !important;
-}
-
-/* Premium right-side detail control. */
-.full-list-detail-button,
-.full-list-detail-button:visited,
-.full-list-detail-button:hover,
-.full-list-detail-button:active {
-    position: absolute !important;
-    right: 18px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    z-index: 40 !important;
-
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-
-    width: 42px !important;
-    min-width: 42px !important;
-    height: 42px !important;
-    min-height: 42px !important;
-
-    padding: 0 !important;
-    margin: 0 !important;
-
-    border-radius: 999px !important;
-    border: 1px solid rgba(240,184,70,0.48) !important;
-
-    background:
-        radial-gradient(
-            circle at 34% 24%,
-            rgba(255,220,145,0.11),
-            rgba(255,178,30,0.045) 35%,
-            transparent 60%
-        ),
-        linear-gradient(
-            180deg,
-            rgba(27,24,18,0.99) 0%,
-            rgba(10,9,7,1) 100%
-        ) !important;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,237,193,0.10),
-        inset 0 -1px 0 rgba(255,178,30,0.04),
-        0 0 0 1px rgba(255,178,30,0.025),
-        0 0 12px rgba(255,178,30,0.10),
-        0 7px 18px rgba(0,0,0,0.35) !important;
-
-    color: #F6C45F !important;
-    text-decoration: none !important;
-    cursor: pointer !important;
-
-    transition:
-        transform 0.18s ease,
-        border-color 0.18s ease,
-        background 0.18s ease,
-        box-shadow 0.18s ease !important;
-}
-
-/* Fine inner ring. */
-.full-list-detail-button::before {
-    content: "" !important;
-    position: absolute !important;
-    inset: 4px !important;
-    border-radius: 999px !important;
-    border: 1px solid rgba(255,210,112,0.075) !important;
-    pointer-events: none !important;
-}
-
-.full-list-detail-arrow {
-    position: relative !important;
-    z-index: 2 !important;
-
-    color: #F6C45F !important;
-    font-family: Inter, "Segoe UI Symbol", Arial, sans-serif !important;
-    font-size: 1.48rem !important;
-    font-weight: 650 !important;
-    line-height: 1 !important;
-
-    transform: translate(-0.5px, -1px) !important;
-
-    text-shadow:
-        0 0 4px rgba(246,196,95,0.32),
-        0 0 9px rgba(255,178,30,0.14) !important;
-
-    transition:
-        transform 0.18s ease,
-        color 0.18s ease,
-        text-shadow 0.18s ease !important;
-}
-
-.full-list-detail-button:hover,
-.full-list-detail-button:focus-visible {
-    transform: translateY(-50%) translateY(-1px) !important;
-    border-color: rgba(255,211,106,0.74) !important;
-
-    background:
-        radial-gradient(
-            circle at 34% 24%,
-            rgba(255,229,165,0.16),
-            rgba(255,178,30,0.08) 36%,
-            transparent 60%
-        ),
-        linear-gradient(
-            180deg,
-            rgba(37,30,18,0.99) 0%,
-            rgba(13,10,7,1) 100%
-        ) !important;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255,240,202,0.14),
-        0 0 0 1px rgba(255,178,30,0.05),
-        0 0 16px rgba(255,178,30,0.18),
-        0 9px 21px rgba(0,0,0,0.40) !important;
-
-    outline: none !important;
-}
-
-.full-list-detail-button:hover .full-list-detail-arrow,
-.full-list-detail-button:focus-visible .full-list-detail-arrow {
-    color: #FFD978 !important;
-    transform: translate(1.5px, -1px) !important;
-
-    text-shadow:
-        0 0 5px rgba(255,217,120,0.42),
-        0 0 11px rgba(255,178,30,0.18) !important;
-}
-
-.full-list-detail-button:active {
-    transform: translateY(-50%) scale(0.96) !important;
-}
-
-@media (max-width: 1400px) {
-    .full-alert-card-shell {
-        max-width: 1180px !important;
-    }
-}
-
-@media (max-width: 900px) {
-    .full-alert-card-shell {
-        max-width: none !important;
-    }
-
-    .full-alert-card-shell .alert-card {
-        padding-right: 66px !important;
-    }
-
-    .full-list-detail-button,
-    .full-list-detail-button:visited,
-    .full-list-detail-button:hover,
-    .full-list-detail-button:active {
-        right: 12px !important;
-        width: 38px !important;
-        min-width: 38px !important;
-        height: 38px !important;
-        min-height: 38px !important;
-    }
-
-    .full-list-detail-arrow {
-        font-size: 1.34rem !important;
-    }
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -8961,19 +8584,9 @@ def _safe_html(value) -> str:
     return html.escape(str(value))
 
 
-def render_transaction_detail_page(
-    tx_hash: str,
-    alerts_df: pd.DataFrame,
-    detail_kind: str = "whale",
-):
-    """Render a transaction detail page for Whale Alerts or Latest Transfers."""
+def render_transaction_detail_page(tx_hash: str, alerts_df: pd.DataFrame):
+    """Render a Whale Alert Details page using the same alert-card design as Whale Alerts."""
     tx_hash = str(tx_hash or "").strip()
-    detail_kind = str(detail_kind or "whale").strip().lower()
-    detail_title = (
-        "Transfer Details"
-        if detail_kind == "transfer"
-        else "Whale Alert Details"
-    )
 
     st.markdown("<div class='tx-detail-shell'>", unsafe_allow_html=True)
     st.markdown(
@@ -8998,10 +8611,7 @@ def render_transaction_detail_page(
     ]
 
     if matched.empty:
-        st.markdown(
-            f"<div class='tx-page-title'>{html.escape(detail_title)}</div>",
-            unsafe_allow_html=True,
-        )
+        st.markdown("<div class='tx-page-title'>Whale Alert Details</div>", unsafe_allow_html=True)
         st.markdown(
             "<div class='tx-not-found'>"
             "This transaction is no longer present in the current Novaris scan window. "
@@ -9073,10 +8683,7 @@ def render_transaction_detail_page(
         else f"https://www.blockchain.com/explorer/transactions/btc/{tx_hash}"
     )
 
-    st.markdown(
-        f"<div class='tx-page-title'>{html.escape(detail_title)}</div>",
-        unsafe_allow_html=True,
-    )
+    st.markdown("<div class='tx-page-title'>Whale Alert Details</div>", unsafe_allow_html=True)
 
     # Use the exact same card composition as the Whale Alerts list:
     # matching asset icon, amount/USD typography, route text, badges and age.
@@ -9850,7 +9457,6 @@ def render_full_alerts_page(
     whale_threshold: float,
     page_title: str = "Latest Transfers",
     max_items: int | None = 30,
-    detail_kind: str = "transfer",
 ):
     """Render transfers using the standard NOVARIS transaction alert cards."""
     st.markdown(
@@ -9910,27 +9516,11 @@ def render_full_alerts_page(
         )
 
         tx_hash_value = str(row.get("tx_hash") or "").strip()
-        safe_tx_hash = html.escape(tx_hash_value, quote=True)
-        safe_detail_kind = "whale" if str(detail_kind).lower() == "whale" else "transfer"
-        alert_href = (
-            f"?tx={safe_tx_hash}&detail={safe_detail_kind}"
-            if tx_hash_value
-            else ""
-        )
-
-        detail_button_html = (
-            f'<a class="full-list-detail-button" '
-            f'href="{alert_href}" target="_self" '
-            f'aria-label="Open transaction details">'
-            f'<span class="full-list-detail-arrow">→</span>'
-            f'</a>'
-            if alert_href
-            else ""
-        )
+        alert_href = f"?tx={tx_hash_value}" if tx_hash_value else "#"
 
         st.markdown(
             f"""
-            <div class="full-alert-card-shell">
+            <a class="alert-card-link full-alert-link" href="{alert_href}" target="_self">
                 <div class="alert-card {whale_class}">
                     <div class="alert-row">
                         <div class="alert-left">
@@ -9947,9 +9537,8 @@ def render_full_alerts_page(
                         </div>
                         <div class="alert-time">{human_age(row["timestamp"])}</div>
                     </div>
-                    {detail_button_html}
                 </div>
-            </div>
+            </a>
             """,
             unsafe_allow_html=True,
         )
@@ -10619,17 +10208,18 @@ def render_monitoring_controls_page(prefs):
             }
 
             if any(old_prefs.get(k) != new_prefs.get(k) for k in fetch_keys):
-                # Rebuild only the lightweight DB-backed display window on the
-                # next rerun. Blockchain ingestion stays explicit via the
-                # "Index Latest Blocks Now" button so normal navigation remains fast.
+                # Rebuild the lightweight DB-backed display window on the next
+                # rerun. The saved block-window settings are also used by the
+                # automatic session-start / freshness-gated index pass.
                 st.session_state.db_cache_loaded = False
 
             if old_prefs.get("news_query") != new_prefs.get("news_query"):
                 st.session_state.force_news_refresh = True
 
             st.success(
-                "Settings saved. Blockchain-related changes will be used the next "
-                "time you select Index Latest Blocks Now."
+                "Settings saved. The new blockchain settings will be used by the "
+                "automatic latest-block index pass. Select Index Latest Blocks Now "
+                "if you want an immediate refresh."
             )
 
         st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
@@ -10720,13 +10310,15 @@ if "force_news_refresh" not in st.session_state:
     st.session_state.force_news_refresh = False
 
 # Final indexed architecture: PostgreSQL is the persistent transaction store.
-# Lightweight DB/API snapshots are loaded once per active browser session and
-# then reused from session state so navigation does not repeat blockchain or DB
-# work. Blockchain ingestion is explicit by default.
+# Lightweight DB/API snapshots are reused from session state so navigation does
+# not repeatedly hit blockchain APIs. Latest-block ingestion runs once on a new
+# session and later only when the Home freshness gate is due or manually forced.
 if "session_bootstrap_complete" not in st.session_state:
     st.session_state.session_bootstrap_complete = False
 if "session_index_attempted" not in st.session_state:
     st.session_state.session_index_attempted = False
+if "last_auto_index_check_at" not in st.session_state:
+    st.session_state.last_auto_index_check_at = 0.0
 if "db_cache_loaded" not in st.session_state:
     st.session_state.db_cache_loaded = False
 if "db_cache_loaded_at" not in st.session_state:
@@ -11009,22 +10601,15 @@ with main_col:
 
 
 # =========================================================
-# FINAL INDEXED DATA FLOW — FAST NAVIGATION
+# FINAL INDEXED DATA FLOW — AUTO-LATEST + FAST NAVIGATION
 # =========================================================
-# Expensive work happens only once per active Streamlit session, or when the
-# user explicitly asks for a new index pass. Navigation buttons merely rerun
-# the script against session snapshots, which keeps tab switching lightweight.
+# A bounded blockchain index pass occurs at session start and only when the
+# Home freshness gate is due (or the user manually refreshes). Normal page
+# switching continues to reuse session/DB snapshots for fast navigation.
 selected_tx_hash = st.query_params.get("tx", "")
 if isinstance(selected_tx_hash, list):
     selected_tx_hash = selected_tx_hash[0] if selected_tx_hash else ""
 selected_tx_hash = str(selected_tx_hash or "").strip()
-
-selected_detail_kind = st.query_params.get("detail", "whale")
-if isinstance(selected_detail_kind, list):
-    selected_detail_kind = selected_detail_kind[0] if selected_detail_kind else "whale"
-selected_detail_kind = str(selected_detail_kind or "whale").strip().lower()
-if selected_detail_kind not in {"whale", "transfer"}:
-    selected_detail_kind = "whale"
 
 now_ts = time.time()
 
@@ -11081,21 +10666,32 @@ news_df = st.session_state.news_data
 market_overview_df = st.session_state.market_overview_data
 
 # ---------------------------------------------------------
-# BLOCKCHAIN INDEXING — EXPLICIT, DATABASE-PERSISTED
+# BLOCKCHAIN INDEXING — AUTO-LATEST, DATABASE-PERSISTED
 # ---------------------------------------------------------
-# By default, opening or navigating NOVARIS never triggers blockchain RPC/API
-# work. Use Settings -> Index Latest Blocks Now to ingest the newest configured
-# block window. If Streamlit slept and blocks were missed, NOVARIS intentionally
-# skips the old gap and indexes only the latest configured window. This keeps
-# the dashboard responsive and is the accepted Streamlit deployment limitation.
+# NOVARIS performs a bounded latest-block index pass:
+#   1. once when a new browser session opens on Home;
+#   2. immediately when Settings -> Index Latest Blocks Now is selected; or
+#   3. when Home is revisited after AUTO_INDEX_REFRESH_SECONDS.
+#
+# There is still NO background ingestion. If Streamlit sleeps, nothing runs.
+# When the app becomes active again, it skips any long inactive gap and indexes
+# only the newest configured block window before refreshing the PostgreSQL view.
+auto_index_due = (
+    AUTO_INDEX_ON_SESSION_START
+    and (
+        not st.session_state.session_index_attempted
+        or (
+            time.time() - float(st.session_state.last_auto_index_check_at or 0.0)
+            >= max(60, int(AUTO_INDEX_REFRESH_SECONDS))
+        )
+    )
+)
+
 should_index_now = (
     nav_view == "home"
     and (
         st.session_state.force_network_refresh
-        or (
-            AUTO_INDEX_ON_SESSION_START
-            and not st.session_state.session_index_attempted
-        )
+        or auto_index_due
     )
 )
 
@@ -11104,6 +10700,7 @@ network_warnings = list(st.session_state.network_warnings)
 
 if should_index_now:
     st.session_state.session_index_attempted = True
+    st.session_state.last_auto_index_check_at = time.time()
     st.session_state.force_network_refresh = False
 
     index_warnings = []
@@ -11337,11 +10934,7 @@ with main_col:
                     ignore_index=True,
                 )
 
-        render_transaction_detail_page(
-            selected_tx_hash,
-            detail_df,
-            detail_kind=selected_detail_kind,
-        )
+        render_transaction_detail_page(selected_tx_hash, detail_df)
         st.stop()
 
     if nav_view == "alerts":
@@ -11350,7 +10943,6 @@ with main_col:
             whale_threshold,
             page_title="Latest Transfers",
             max_items=30,
-            detail_kind="transfer",
         )
         st.stop()
 
@@ -11363,7 +10955,6 @@ with main_col:
             whale_threshold,
             page_title="Whale Alerts",
             max_items=None,
-            detail_kind="whale",
         )
         st.stop()
 
@@ -11593,24 +11184,14 @@ with main_col:
 
                     tx_hash_value = str(row.get("tx_hash") or "").strip()
                     alert_href = (
-                        f"?tx={html.escape(tx_hash_value, quote=True)}"
+                        f"?tx={tx_hash_value}"
                         if tx_hash_value
-                        else ""
-                    )
-
-                    detail_button_html = (
-                        f'<a class="home-transfer-detail-button" '
-                        f'href="{alert_href}" target="_self" '
-                        f'aria-label="Open Whale Alert Details">'
-                        f'<span class="home-transfer-detail-arrow">→</span>'
-                        f'</a>'
-                        if alert_href
-                        else ""
+                        else "#"
                     )
 
                     st.markdown(
                         (
-                            f'<div class="home-transfer-card-shell">'
+                            f'<a class="alert-card-link" href="{alert_href}" target="_self">'
                             f'<div class="alert-card {whale_class}">'
                             f'<div class="alert-row">'
                             f'<div class="alert-left">'
@@ -11627,9 +11208,8 @@ with main_col:
                             f'</div>'
                             f'<div class="alert-time">{human_age(row["timestamp"])}</div>'
                             f'</div>'
-                            f'{detail_button_html}'
                             f'</div>'
-                            f'</div>'
+                            f'</a>'
                         ),
                         unsafe_allow_html=True,
                     )
