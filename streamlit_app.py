@@ -6347,6 +6347,189 @@ Latest Blockchain News.
     }
 }
 
+
+/* =========================================================
+   KPI INFORMATION TOOLTIPS
+   ========================================================= */
+
+/* Keep each label and its information icon aligned on one line. */
+.metric-label-row,
+.fg-index-title-row {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    min-width: 0 !important;
+}
+
+/* Accessible circular information icon. */
+.metric-info-tooltip {
+    position: relative !important;
+    z-index: 500 !important;
+
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    flex: 0 0 18px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    color: #D9B35C !important;
+    cursor: help !important;
+    pointer-events: auto !important;
+    outline: none !important;
+
+    transform: translateY(-0.5px);
+}
+
+.metric-info-tooltip svg {
+    width: 16px !important;
+    height: 16px !important;
+    display: block !important;
+
+    stroke: currentColor !important;
+    fill: none !important;
+    stroke-width: 1.9 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+
+    filter:
+        drop-shadow(0 0 4px rgba(255,178,30,0.18))
+        drop-shadow(0 0 8px rgba(255,178,30,0.08));
+}
+
+.metric-info-tooltip:hover,
+.metric-info-tooltip:focus-visible {
+    color: #FFD66F !important;
+}
+
+/* Custom dark NOVARIS tooltip. */
+.metric-tooltip-bubble {
+    position: absolute !important;
+    left: 50% !important;
+    top: calc(100% + 10px) !important;
+    transform: translateX(-18%) translateY(-2px) !important;
+
+    width: max-content !important;
+    min-width: 220px !important;
+    max-width: 360px !important;
+
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+
+    color: #F5F1E8 !important;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(20,20,20,0.995),
+            rgba(7,7,7,0.995)
+        ) !important;
+
+    border: 1px solid rgba(255,178,30,0.34) !important;
+    border-radius: 10px !important;
+
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.025),
+        0 10px 28px rgba(0,0,0,0.48),
+        0 0 18px rgba(255,178,30,0.09) !important;
+
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 560 !important;
+    line-height: 1.42 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    text-align: left !important;
+    white-space: normal !important;
+
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+
+    transition:
+        opacity 0.16s ease,
+        transform 0.16s ease,
+        visibility 0.16s ease !important;
+
+    z-index: 2000 !important;
+}
+
+.metric-tooltip-bubble::before {
+    content: "" !important;
+    position: absolute !important;
+    top: -6px !important;
+    left: 18% !important;
+
+    width: 10px !important;
+    height: 10px !important;
+
+    background: rgba(18,18,18,0.995) !important;
+    border-left: 1px solid rgba(255,178,30,0.34) !important;
+    border-top: 1px solid rgba(255,178,30,0.34) !important;
+
+    transform: rotate(45deg) !important;
+}
+
+.metric-info-tooltip:hover .metric-tooltip-bubble,
+.metric-info-tooltip:focus-visible .metric-tooltip-bubble {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-18%) translateY(0) !important;
+}
+
+/*
+The three top KPI cards use invisible Streamlit buttons as full-card
+click targets. Keep the visual card above those buttons but make the card
+itself pointer-transparent, then re-enable pointer events only for the
+information icon. This preserves both full-card navigation and tooltip hover.
+*/
+.st-key-whale_alerts_kpi_clickable .metric-card,
+.st-key-eth_market_kpi_clickable .metric-card,
+.st-key-btc_market_kpi_clickable .metric-card {
+    z-index: 101 !important;
+    pointer-events: none !important;
+    overflow: visible !important;
+}
+
+.st-key-whale_alerts_kpi_clickable .metric-info-tooltip,
+.st-key-eth_market_kpi_clickable .metric-info-tooltip,
+.st-key-btc_market_kpi_clickable .metric-info-tooltip {
+    pointer-events: auto !important;
+}
+
+/* Compact KPI tooltips may extend beyond the visual card boundary. */
+.metric-card.compact-kpi {
+    overflow: visible !important;
+}
+
+/* Keep the right-most Bitcoin tooltip comfortably inside the viewport. */
+.st-key-btc_market_kpi_clickable .metric-tooltip-bubble {
+    left: auto !important;
+    right: -8px !important;
+    transform: translateY(-2px) !important;
+}
+
+.st-key-btc_market_kpi_clickable .metric-info-tooltip:hover .metric-tooltip-bubble,
+.st-key-btc_market_kpi_clickable .metric-info-tooltip:focus-visible .metric-tooltip-bubble {
+    transform: translateY(0) !important;
+}
+
+.st-key-btc_market_kpi_clickable .metric-tooltip-bubble::before {
+    left: auto !important;
+    right: 10px !important;
+}
+
+/* Fear & Greed title uses the same information treatment. */
+.fg-index-title-row {
+    gap: 8px !important;
+}
+
+.st-key-fear_greed_index_card .metric-tooltip-bubble {
+    min-width: 280px !important;
+    max-width: 390px !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -7560,13 +7743,34 @@ def fear_greed_style(classification):
     return "#7cf8ff", "rgba(124,248,255,0.14)", "rgba(124,248,255,0.28)"
 
 
-def render_stat_card(label, value, icon="", accent="#FFB21E", glow=False, badge_text=None, badge_colors=None, secondary=False, compact=False, subtext=None):
+
+def metric_tooltip_html(tooltip_text):
+    """Return an accessible NOVARIS information icon with a hover/focus tooltip."""
+    if not tooltip_text:
+        return ""
+
+    safe_text = html.escape(str(tooltip_text), quote=True)
+
+    return (
+        f"<span class='metric-info-tooltip' tabindex='0' aria-label='{safe_text}'>"
+        f"<svg viewBox='0 0 24 24' aria-hidden='true'>"
+        f"<circle cx='12' cy='12' r='9'></circle>"
+        f"<path d='M12 10.5v6'></path>"
+        f"<path d='M12 7.5h.01'></path>"
+        f"</svg>"
+        f"<span class='metric-tooltip-bubble' role='tooltip'>{safe_text}</span>"
+        f"</span>"
+    )
+
+
+def render_stat_card(label, value, icon="", accent="#FFB21E", glow=False, badge_text=None, badge_colors=None, secondary=False, compact=False, subtext=None, tooltip=None):
     glow_class = " glow-card" if glow else ""
     secondary_class = " secondary-card" if secondary else ""
     compact_class = " compact-kpi" if compact else ""
     icon_html = f"<div class='metric-icon'>{icon}</div>" if icon else ""
     accent_bar = f"<div class='metric-accent' style='background:linear-gradient(90deg, transparent, {accent}, transparent); box-shadow:0 0 18px {accent}, 0 0 34px {accent}55;'></div>"
     badge_html = ""
+    tooltip_html = metric_tooltip_html(tooltip)
 
     if badge_text:
         bg = badge_colors[0] if badge_colors else "rgba(124,248,255,0.14)"
@@ -7587,7 +7791,7 @@ def render_stat_card(label, value, icon="", accent="#FFB21E", glow=False, badge_
             f"<div class='metric-kpi-layout'>"
             f"<div class='metric-kpi-icon-ring'>{icon_html}</div>"
             f"<div class='metric-kpi-copy'>"
-            f"<div class='metric-label'>{label}</div>"
+            f"<div class='metric-label-row'><div class='metric-label'>{label}</div>{tooltip_html}</div>"
             f"<div class='metric-value'>{str(value)}</div>"
             f"{subtext_html}"
             f"</div>"
@@ -7601,7 +7805,7 @@ def render_stat_card(label, value, icon="", accent="#FFB21E", glow=False, badge_
             f"{accent_bar}"
             f"<div class='metric-main'>"
             f"<div class='metric-head'>"
-            f"<div class='metric-head-left'>{icon_html}<div class='metric-label'>{label}</div></div>"
+            f"<div class='metric-head-left'>{icon_html}<div class='metric-label-row'><div class='metric-label'>{label}</div>{tooltip_html}</div></div>"
             f"{badge_html}"
             f"</div>"
             f"<div class='metric-value'>{str(value)}</div>"
@@ -7825,15 +8029,23 @@ def render_fear_greed_index_card(fg):
     )
 
     with st.container(key="fear_greed_index_card"):
+        fear_greed_tooltip = metric_tooltip_html(
+            "Indicates overall crypto market sentiment from 0–100. "
+            "Lower scores represent fear, while higher scores represent greed."
+        )
+
         st.markdown(
-            """
-            <div class="fg-index-header">
-                <div class="fg-index-title-wrap">
-                    <span class="fg-index-icon-ring"><span class="fg-index-icon">◐</span></span>
-                    <div class="fg-index-title">FEAR &amp; GREED INDEX</div>
-                </div>
-            </div>
-            """,
+            (
+                '<div class="fg-index-header">'
+                '<div class="fg-index-title-wrap">'
+                '<span class="fg-index-icon-ring"><span class="fg-index-icon">◐</span></span>'
+                '<div class="fg-index-title-row">'
+                '<div class="fg-index-title">FEAR &amp; GREED INDEX</div>'
+                f'{fear_greed_tooltip}'
+                '</div>'
+                '</div>'
+                '</div>'
+            ),
             unsafe_allow_html=True,
         )
 
@@ -10334,6 +10546,11 @@ with main_col:
                 glow=True,
                 compact=True,
                 subtext=None,
+                tooltip=(
+                    "Large cryptocurrency transfers detected by Novaris. "
+                    f"Alerts are triggered when a transaction exceeds the configured whale "
+                    f"threshold of {whale_threshold:,.0f} US dollars."
+                ),
             )
 
             st.button(
@@ -10352,6 +10569,7 @@ with main_col:
                 accent="#FFB21E",
                 compact=True,
                 subtext=None,
+                tooltip="Current market price of one Ethereum (ETH) in US dollars.",
             )
 
             st.button(
@@ -10370,6 +10588,7 @@ with main_col:
                 accent="#FFB21E",
                 compact=True,
                 subtext=None,
+                tooltip="Current market price of one Bitcoin (BTC) in US dollars.",
             )
 
             st.button(
