@@ -92,6 +92,7 @@ REQUIRED_COLUMNS = [
     "chain",
     "asset_symbol",
     "asset_name",
+    "block_number",
     "timestamp",
     "tx_hash",
     "from",
@@ -6858,6 +6859,531 @@ def load_transaction_from_db(tx_hash):
     return normalize_db_transactions(tx_df)
 
 
+def ensure_final_index_schema():
+    """Idempotently upgrade the existing Neon schema for final indexing mode."""
+    if db_engine is None:
+        return False
+
+    statements = [
+        "ALTER TABLE transactions ADD COLUMN IF NOT EXISTS block_number BIGINT",
+        "CREATE INDEX IF NOT EXISTS idx_tx_chain_block ON transactions(chain, block_number DESC)",
+        "ALTER TABLE scan_runs ADD COLUMN IF NOT EXISTS scan_mode TEXT DEFAULT 'rolling'",
+        "ALTER TABLE scan_runs ADD COLUMN IF NOT EXISTS eth_from_block BIGINT",
+        "ALTER TABLE scan_runs ADD COLUMN IF NOT EXISTS eth_to_block BIGINT",
+        "ALTER TABLE scan_runs ADD COLUMN IF NOT EXISTS btc_from_block BIGINT",
+        "ALTER TABLE scan_runs ADD COLUMN IF NOT EXISTS btc_to_block BIGINT",
+        "CREATE TABLE IF NOT EXISTS monitoring_state (chain TEXT PRIMARY KEY, last_processed_block BIGINT, updated_at TIMESTAMPTZ DEFAULT NOW())",
+    ]
+
+    try:
+        with db_engine.begin() as connection:
+            for statement in statements:
+                connection.execute(text(statement))
+        return True
+    except Exception as exc:
+        st.session_state.db_last_error = str(exc)
+        return False
+
+
+def get_index_checkpoint(chain):
+    """Return the last successfully indexed block height for a chain."""
+    if db_engine is None:
+        return None
+    try:
+        with db_engine.connect() as connection:
+            value = connection.execute(
+                text("SELECT last_processed_block FROM monitoring_state WHERE chain = :chain"),
+                {"chain": str(chain)},
+            ).scalar_one_or_none()
+        return int(value) if value is not None else None
+    except Exception as exc:
+        st.session_state.db_last_read_error = str(exc)
+        return None
+
+
+def update_index_checkpoint(connection, chain, block_number):
+    """Advance a chain checkpoint inside the same successful DB transaction."""
+    if block_number is None:
+        return
+    connection.execute(
+        text("""
+            INSERT INTO monitoring_state (chain, last_processed_block, updated_at)
+            VALUES (:chain, :block_number, NOW())
+            ON CONFLICT (chain)
+            DO UPDATE SET
+                last_processed_block = EXCLUDED.last_processed_block,
+                updated_at = NOW()
+        """),
+        {"chain": str(chain), "block_number": int(block_number)},
+    )
+
+
+def choose_index_range(latest_block, last_processed_block, window_size, chain_label):
+    """
+    Select blocks for this active-session index pass.
+
+    NOVARIS intentionally does not backfill a long sleep gap. If the gap is
+    larger than the configured window, it skips directly to the latest window.
+    This keeps Streamlit startup predictable and is a documented deployment
+    limitation rather than a background-ingestion system.
+    """
+    latest_block = int(latest_block)
+    window_size = max(1, int(window_size))
+    warning = None
+
+    if last_processed_block is None:
+        start_block = max(0, latest_block - window_size + 1)
+        return start_block, latest_block, warning
+
+    last_processed_block = int(last_processed_block)
+    if latest_block <= last_processed_block:
+        return None, None, None
+
+    first_unprocessed = last_processed_block + 1
+    gap = latest_block - last_processed_block
+
+    if gap > window_size:
+        start_block = max(0, latest_block - window_size + 1)
+        skipped = max(0, start_block - first_unprocessed)
+        if skipped:
+            warning = (
+                f"{chain_label} index skipped {skipped:,} block(s) while the app "
+                f"was inactive; indexed only the latest {window_size} block(s)."
+            )
+        return start_block, latest_block, warning
+
+    return first_unprocessed, latest_block, warning
+
+
+def get_eth_tip_height():
+    latest_hex = eth_rpc("eth_blockNumber")
+    return int(latest_hex, 16)
+
+
+def get_btc_tip_height():
+    last_error = None
+    for base in ["https://blockstream.info/api", "https://mempool.space/api"]:
+        try:
+            return int(safe_get_text(f"{base}/blocks/tip/height").strip()), base
+        except Exception as exc:
+            last_error = exc
+    raise RuntimeError(f"Bitcoin tip lookup failed: {last_error}")
+
+
+def fetch_eth_native_range(start_block, end_block, eth_price):
+    """Index native ETH transfers for an explicit inclusive block range."""
+    if start_block is None or end_block is None or start_block > end_block:
+        return empty_alert_df(), []
+
+    rows, warnings = [], []
+    try:
+        for bn in range(int(start_block), int(end_block) + 1):
+            block = eth_rpc("eth_getBlockByNumber", [hex(bn), True])
+            if not block:
+                continue
+            block_time = datetime.fromtimestamp(int(block["timestamp"], 16), tz=timezone.utc)
+            for tx in block.get("transactions", []):
+                value_wei = int(tx.get("value", "0x0"), 16)
+                if value_wei <= 0:
+                    continue
+                amount_eth = value_wei / 10**18
+                rows.append({
+                    "chain": CHAIN_ETH,
+                    "asset_symbol": "ETH",
+                    "asset_name": "Ethereum",
+                    "block_number": int(bn),
+                    "timestamp": block_time,
+                    "tx_hash": tx.get("hash"),
+                    "from": tx.get("from", ""),
+                    "to": tx.get("to", ""),
+                    "direction": "network",
+                    "amount_native": amount_eth,
+                    "amount_usd": amount_eth * eth_price if eth_price else None,
+                    "source_type": "network",
+                    "watch_address": None,
+                    "event_note": "Indexed native ETH transfer.",
+                })
+    except Exception as exc:
+        warnings.append(f"Ethereum indexing failed: {exc}")
+
+    return (pd.DataFrame(rows) if rows else empty_alert_df(), warnings)
+
+
+def fetch_eth_erc20_range(start_block, end_block, prices, enabled=False):
+    """Index ERC-20 Transfer events for an explicit inclusive block range."""
+    if not enabled or start_block is None or end_block is None or start_block > end_block:
+        return empty_alert_df(), []
+
+    rows, warnings = [], []
+    try:
+        logs = eth_rpc("eth_getLogs", [{
+            "fromBlock": hex(int(start_block)),
+            "toBlock": hex(int(end_block)),
+            "topics": [TRANSFER_TOPIC],
+        }]) or []
+
+        block_time_cache = {}
+        for log in logs:
+            topics = log.get("topics", [])
+            if len(topics) < 3:
+                continue
+
+            contract = log.get("address", "")
+            tx_hash = log.get("transactionHash", "")
+            block_number = int(log.get("blockNumber", "0x0"), 16)
+            raw_amount = int(log.get("data", "0x0"), 16)
+
+            meta = fetch_eth_token_metadata(contract)
+            symbol = meta["symbol"]
+            decimals = meta["decimals"]
+            name = meta["name"]
+            amount_native = raw_amount / (10 ** decimals) if decimals >= 0 else float(raw_amount)
+
+            if symbol in STABLECOINS:
+                proxy_price = 1.0
+            elif symbol == "WBTC":
+                proxy_price = prices.get("BTC")
+            elif symbol in ["WETH", "ETH"]:
+                proxy_price = prices.get("ETH")
+            else:
+                proxy_price = prices.get(symbol)
+
+            if block_number not in block_time_cache:
+                block = eth_rpc("eth_getBlockByNumber", [hex(block_number), False])
+                block_time_cache[block_number] = datetime.fromtimestamp(
+                    int(block["timestamp"], 16), tz=timezone.utc
+                )
+
+            rows.append({
+                "chain": CHAIN_ETH,
+                "asset_symbol": symbol,
+                "asset_name": name,
+                "block_number": block_number,
+                "timestamp": block_time_cache[block_number],
+                "tx_hash": tx_hash,
+                "from": hex_to_address(topics[1]),
+                "to": hex_to_address(topics[2]),
+                "direction": "network",
+                "amount_native": amount_native,
+                "amount_usd": amount_native * proxy_price if proxy_price is not None else None,
+                "source_type": "network",
+                "watch_address": None,
+                "event_note": "Indexed ERC-20 Transfer event.",
+            })
+    except Exception as exc:
+        warnings.append(f"Ethereum ERC-20 indexing failed: {exc}")
+
+    return (pd.DataFrame(rows) if rows else empty_alert_df(), warnings)
+
+
+def fetch_btc_range(start_block, end_block, btc_price, tx_per_block, preferred_base=None):
+    """Index a bounded set of Bitcoin transactions for an explicit block range."""
+    if start_block is None or end_block is None or start_block > end_block:
+        return empty_alert_df(), []
+
+    bases = []
+    if preferred_base:
+        bases.append(preferred_base)
+    for candidate in ["https://blockstream.info/api", "https://mempool.space/api"]:
+        if candidate not in bases:
+            bases.append(candidate)
+
+    last_error = None
+    for base in bases:
+        rows = []
+        try:
+            for height in range(int(start_block), int(end_block) + 1):
+                block_hash = safe_get_text(f"{base}/block-height/{height}").strip()
+                txids = safe_get_json(f"{base}/block/{block_hash}/txids")[: int(tx_per_block)]
+
+                for txid in txids:
+                    try:
+                        tx = safe_get_json(f"{base}/tx/{txid}")
+                    except Exception:
+                        continue
+
+                    vins = tx.get("vin", [])
+                    vouts = tx.get("vout", [])
+                    if not vouts:
+                        continue
+
+                    largest_vout = max(vouts, key=lambda x: x.get("value", 0))
+                    amount_btc = largest_vout.get("value", 0) / 10**8
+                    first_from = (
+                        (vins[0].get("prevout") or {}).get("scriptpubkey_address", "")
+                        if vins else ""
+                    )
+                    first_to = largest_vout.get("scriptpubkey_address", "")
+                    block_time_raw = tx.get("status", {}).get("block_time")
+                    ts = (
+                        datetime.fromtimestamp(block_time_raw, tz=timezone.utc)
+                        if block_time_raw else datetime.now(timezone.utc)
+                    )
+
+                    rows.append({
+                        "chain": CHAIN_BTC,
+                        "asset_symbol": "BTC",
+                        "asset_name": "Bitcoin",
+                        "block_number": int(height),
+                        "timestamp": ts,
+                        "tx_hash": tx.get("txid"),
+                        "from": first_from,
+                        "to": first_to,
+                        "direction": "network",
+                        "amount_native": amount_btc,
+                        "amount_usd": amount_btc * btc_price if btc_price else None,
+                        "source_type": "network",
+                        "watch_address": None,
+                        "event_note": f"Indexed BTC transfer via {base}.",
+                    })
+            return (pd.DataFrame(rows) if rows else empty_alert_df(), [])
+        except Exception as exc:
+            last_error = exc
+
+    return empty_alert_df(), [f"Bitcoin indexing failed: {last_error}"]
+
+
+def create_index_scan_run(meta, transaction_count, warnings, include_erc20, btc_txs_per_block):
+    if db_engine is None:
+        return None
+
+    sql = text("""
+        INSERT INTO scan_runs (
+            status, completed_at, scan_mode,
+            eth_blocks, btc_blocks, btc_txs_per_block, include_erc20,
+            transaction_count, warning_text,
+            eth_from_block, eth_to_block, btc_from_block, btc_to_block
+        )
+        VALUES (
+            'running', NULL, 'incremental_latest',
+            :eth_blocks, :btc_blocks, :btc_txs_per_block, :include_erc20,
+            :transaction_count, :warning_text,
+            :eth_from_block, :eth_to_block, :btc_from_block, :btc_to_block
+        )
+        RETURNING id
+    """)
+
+    def span(a, b):
+        return 0 if a is None or b is None else max(0, int(b) - int(a) + 1)
+
+    params = {
+        "eth_blocks": span(meta.get("eth_from"), meta.get("eth_to")),
+        "btc_blocks": span(meta.get("btc_from"), meta.get("btc_to")),
+        "btc_txs_per_block": int(btc_txs_per_block),
+        "include_erc20": bool(include_erc20),
+        "transaction_count": int(transaction_count),
+        "warning_text": "\n".join(str(x) for x in (warnings or [])) or None,
+        "eth_from_block": meta.get("eth_from"),
+        "eth_to_block": meta.get("eth_to"),
+        "btc_from_block": meta.get("btc_from"),
+        "btc_to_block": meta.get("btc_to"),
+    }
+
+    with db_engine.begin() as connection:
+        return int(connection.execute(sql, params).scalar_one())
+
+
+def save_index_transactions_to_db(connection, df, scan_id):
+    if df is None or df.empty:
+        return 0
+
+    sql = text("""
+        INSERT INTO transactions (
+            event_key, chain, tx_hash, asset_symbol, asset_name, block_number,
+            timestamp, from_address, to_address, direction,
+            amount_native, amount_usd, source_type, watch_address, event_note,
+            base_score, risk_level, alert_flag, anomaly_reason,
+            news_sentiment_score, fear_greed_score,
+            combined_sentiment_score, combined_sentiment_label,
+            final_score, final_risk, final_explanation,
+            first_seen_scan_id, last_seen_scan_id
+        )
+        VALUES (
+            :event_key, :chain, :tx_hash, :asset_symbol, :asset_name, :block_number,
+            :timestamp, :from_address, :to_address, :direction,
+            :amount_native, :amount_usd, :source_type, :watch_address, :event_note,
+            :base_score, :risk_level, :alert_flag, :anomaly_reason,
+            :news_sentiment_score, :fear_greed_score,
+            :combined_sentiment_score, :combined_sentiment_label,
+            :final_score, :final_risk, :final_explanation,
+            :scan_id, :scan_id
+        )
+        ON CONFLICT (event_key)
+        DO UPDATE SET
+            block_number = COALESCE(EXCLUDED.block_number, transactions.block_number),
+            amount_usd = EXCLUDED.amount_usd,
+            base_score = EXCLUDED.base_score,
+            risk_level = EXCLUDED.risk_level,
+            alert_flag = EXCLUDED.alert_flag,
+            anomaly_reason = EXCLUDED.anomaly_reason,
+            news_sentiment_score = EXCLUDED.news_sentiment_score,
+            fear_greed_score = EXCLUDED.fear_greed_score,
+            combined_sentiment_score = EXCLUDED.combined_sentiment_score,
+            combined_sentiment_label = EXCLUDED.combined_sentiment_label,
+            final_score = EXCLUDED.final_score,
+            final_risk = EXCLUDED.final_risk,
+            final_explanation = EXCLUDED.final_explanation,
+            last_seen_at = NOW(),
+            last_seen_scan_id = EXCLUDED.last_seen_scan_id
+    """)
+
+    records = []
+    for _, row in df.iterrows():
+        chain = str(row.get("chain") or "").strip()
+        tx_hash = str(row.get("tx_hash") or "").strip()
+        timestamp = pd.to_datetime(row.get("timestamp"), utc=True, errors="coerce")
+        if not chain or not tx_hash or pd.isna(timestamp):
+            continue
+
+        alert_flag = _db_value(row.get("alert_flag"))
+        if alert_flag is not None:
+            alert_flag = bool(alert_flag)
+
+        records.append({
+            "event_key": make_event_key(row),
+            "chain": chain,
+            "tx_hash": tx_hash,
+            "asset_symbol": _db_value(row.get("asset_symbol")),
+            "asset_name": _db_value(row.get("asset_name")),
+            "block_number": _db_value(row.get("block_number")),
+            "timestamp": timestamp.to_pydatetime(),
+            "from_address": _db_value(row.get("from")),
+            "to_address": _db_value(row.get("to")),
+            "direction": _db_value(row.get("direction")),
+            "amount_native": _db_value(row.get("amount_native")),
+            "amount_usd": _db_value(row.get("amount_usd")),
+            "source_type": _db_value(row.get("source_type")),
+            "watch_address": _db_value(row.get("watch_address")),
+            "event_note": _db_value(row.get("event_note")),
+            "base_score": _db_value(row.get("base_score")),
+            "risk_level": _db_value(row.get("risk_level")),
+            "alert_flag": alert_flag,
+            "anomaly_reason": _db_value(row.get("anomaly_reason")),
+            "news_sentiment_score": _db_value(row.get("news_sentiment_score")),
+            "fear_greed_score": _db_value(row.get("fear_greed_score")),
+            "combined_sentiment_score": _db_value(row.get("combined_sentiment_score")),
+            "combined_sentiment_label": _db_value(row.get("combined_sentiment_label")),
+            "final_score": _db_value(row.get("final_score")),
+            "final_risk": _db_value(row.get("final_risk")),
+            "final_explanation": _db_value(row.get("final_explanation")),
+            "scan_id": int(scan_id),
+        })
+
+    if records:
+        connection.execute(sql, records)
+    return len(records)
+
+
+def persist_index_batch(df, meta, warnings, include_erc20, btc_txs_per_block):
+    """Atomically save indexed events, advance checkpoints, and finish scan audit."""
+    if db_engine is None:
+        return None
+
+    scan_id = None
+    try:
+        scan_id = create_index_scan_run(
+            meta=meta,
+            transaction_count=0 if df is None else len(df),
+            warnings=warnings,
+            include_erc20=include_erc20,
+            btc_txs_per_block=btc_txs_per_block,
+        )
+
+        with db_engine.begin() as connection:
+            stored_count = save_index_transactions_to_db(connection, df, scan_id)
+            update_index_checkpoint(connection, CHAIN_ETH, meta.get("eth_to"))
+            update_index_checkpoint(connection, CHAIN_BTC, meta.get("btc_to"))
+            connection.execute(
+                text("""
+                    UPDATE scan_runs
+                    SET status='success', completed_at=NOW(), transaction_count=:count
+                    WHERE id=:scan_id
+                """),
+                {"count": int(stored_count), "scan_id": int(scan_id)},
+            )
+
+        st.session_state.db_last_scan_id = scan_id
+        st.session_state.db_last_stored_count = stored_count
+        st.session_state.db_last_saved_at = time.time()
+        st.session_state.db_last_error = ""
+        return scan_id
+
+    except Exception as exc:
+        st.session_state.db_last_error = str(exc)
+        try:
+            if scan_id is not None:
+                with db_engine.begin() as connection:
+                    connection.execute(
+                        text("UPDATE scan_runs SET status='failed', completed_at=NOW() WHERE id=:scan_id"),
+                        {"scan_id": int(scan_id)},
+                    )
+        except Exception:
+            pass
+        return None
+
+
+def load_db_dashboard_window(eth_blocks=1, btc_blocks=4):
+    """Load the latest indexed block window for both chains from PostgreSQL."""
+    if db_engine is None:
+        return None
+
+    sql = """
+        WITH eth_heights AS (
+            SELECT DISTINCT block_number
+            FROM transactions
+            WHERE chain = :eth_chain AND source_type = 'network' AND block_number IS NOT NULL
+            ORDER BY block_number DESC
+            LIMIT :eth_blocks
+        ),
+        btc_heights AS (
+            SELECT DISTINCT block_number
+            FROM transactions
+            WHERE chain = :btc_chain AND source_type = 'network' AND block_number IS NOT NULL
+            ORDER BY block_number DESC
+            LIMIT :btc_blocks
+        )
+        SELECT t.*
+        FROM transactions t
+        WHERE
+            (t.chain = :eth_chain AND t.block_number IN (SELECT block_number FROM eth_heights))
+            OR
+            (t.chain = :btc_chain AND t.block_number IN (SELECT block_number FROM btc_heights))
+        ORDER BY t.timestamp DESC, t.amount_usd DESC NULLS LAST
+    """
+
+    df = db_query_dataframe(
+        sql,
+        {
+            "eth_chain": CHAIN_ETH,
+            "btc_chain": CHAIN_BTC,
+            "eth_blocks": max(1, int(eth_blocks)),
+            "btc_blocks": max(1, int(btc_blocks)),
+        },
+    )
+
+    normalized = normalize_db_transactions(df)
+    if normalized is not None and not normalized.empty:
+        return normalized
+
+    # Migration fallback for Phase 1/2 rows that predate block_number storage.
+    legacy_df, _ = load_latest_db_snapshot()
+    return legacy_df
+
+
+def refresh_session_db_cache(eth_blocks=1, btc_blocks=4):
+    """Refresh DB-backed display data once, then reuse it on navigation reruns."""
+    snapshot = load_db_dashboard_window(eth_blocks, btc_blocks)
+    timeline = load_db_timeline_history(days=7)
+
+    if snapshot is not None:
+        st.session_state.db_network_cache_df = snapshot
+    if timeline is not None:
+        st.session_state.db_timeline_cache_df = timeline
+
+    st.session_state.db_cache_loaded = True
+    st.session_state.db_cache_loaded_at = time.time()
+
+
 def empty_alert_df():
     return pd.DataFrame(columns=REQUIRED_COLUMNS)
 
@@ -8991,6 +9517,16 @@ def render_monitoring_controls_page(prefs):
 
             st.success("Settings saved successfully.")
 
+        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+        if st.button(
+            "Index Latest Blocks Now",
+            key="manual_index_latest_blocks",
+            icon=":material/sync:",
+            use_container_width=True,
+        ):
+            st.session_state.force_network_refresh = True
+            st.session_state.nav_view = "home"
+            st.rerun()
 
 
 # =========================================================
@@ -9067,6 +9603,22 @@ if "force_network_refresh" not in st.session_state:
     st.session_state.force_network_refresh = False
 if "force_news_refresh" not in st.session_state:
     st.session_state.force_news_refresh = False
+
+# Final indexed architecture: expensive APIs/DB reads are performed once per
+# active browser session (or when explicitly refreshed), then navigation reuses
+# these session snapshots so tab changes remain fast.
+if "session_bootstrap_complete" not in st.session_state:
+    st.session_state.session_bootstrap_complete = False
+if "session_index_attempted" not in st.session_state:
+    st.session_state.session_index_attempted = False
+if "db_cache_loaded" not in st.session_state:
+    st.session_state.db_cache_loaded = False
+if "db_cache_loaded_at" not in st.session_state:
+    st.session_state.db_cache_loaded_at = 0.0
+if "db_network_cache_df" not in st.session_state:
+    st.session_state.db_network_cache_df = empty_alert_df()
+if "db_timeline_cache_df" not in st.session_state:
+    st.session_state.db_timeline_cache_df = empty_alert_df()
 
 if "watchlist_final_df" not in st.session_state:
     st.session_state.watchlist_final_df = empty_alert_df()
@@ -9204,7 +9756,7 @@ with main_col:
             "<span class='brand-spark'>✦</span>"
             "</div>"
             "<div class='brand-sub'>An intelligence console for live Bitcoin and Ethereum monitoring and signal detection.</div>"
-            "<div class='brand-mini'>Network data is reused between views; Alerts opens the current Home snapshot without refetching blockchain data.</div>"
+            "<div class='brand-mini'>Indexed blockchain data is stored in PostgreSQL; navigation reuses session snapshots for fast page switching.</div>"
             "</div>",
             unsafe_allow_html=True,
         )
@@ -9342,102 +9894,64 @@ with main_col:
 
 
 # =========================================================
-# SELECTIVE DATA LOADING / SESSION SNAPSHOTS
+# FINAL INDEXED DATA FLOW — FAST NAVIGATION
 # =========================================================
-# Transaction links still use ?tx=... because they represent a drill-down view,
-# but top-level navigation no longer uses query parameters.
+# Expensive work happens only once per active Streamlit session, or when the
+# user explicitly asks for a new index pass. Navigation buttons merely rerun
+# the script against session snapshots, which keeps tab switching lightweight.
 selected_tx_hash = st.query_params.get("tx", "")
 if isinstance(selected_tx_hash, list):
     selected_tx_hash = selected_tx_hash[0] if selected_tx_hash else ""
 selected_tx_hash = str(selected_tx_hash or "").strip()
 
 now_ts = time.time()
-# Home and Transfers are the views allowed to refresh the live network snapshot.
-#
-# Alerts deliberately reuses the exact same already-loaded transaction snapshot
-# that produced the WHALE ALERTS KPI on Home. This makes Home -> Alerts a display
-# change only, rather than another Ethereum/Bitcoin API refresh.
-#
-# A direct first visit to Alerts / a transaction deep-link can still perform one
-# initial load if there is no network snapshot in this Streamlit session yet.
-network_snapshot_missing = (
-    st.session_state.network_loaded_at <= 0
-    or st.session_state.network_final_df is None
-)
 
-need_network = (
-    nav_view in {"home", "alerts"}
-    or (
-        nav_view == "whales"
-        and network_snapshot_missing
-    )
-    or (
-        bool(selected_tx_hash)
-        and network_snapshot_missing
-    )
-)
+# Idempotent schema upgrade. Cached at the Streamlit-process level by state.
+if "final_schema_ready" not in st.session_state:
+    st.session_state.final_schema_ready = ensure_final_index_schema()
 
-need_news = nav_view in {"home", "news"}
-need_prices = need_network or run_watchlist_btn or nav_view == "market"
-need_fear_greed = need_network or run_watchlist_btn
-
-prices_updated = False
-fear_greed_updated = False
-news_updated = False
-
-# Prices are fetched for blockchain valuation and the dedicated Market page.
-if need_prices:
-    prices_stale = (
-        st.session_state.prices_loaded_at <= 0
-        or (now_ts - st.session_state.prices_loaded_at) >= MARKET_REFRESH_SECONDS
-    )
-    if prices_stale:
+# ---------------------------------------------------------
+# ONE-TIME SESSION BOOTSTRAP FOR SMALL EXTERNAL DATA
+# ---------------------------------------------------------
+# We deliberately preload all dashboard context once so Market/News/Home can
+# switch instantly afterwards. A browser/app restart creates a new session and
+# therefore gets a fresh snapshot.
+if not st.session_state.session_bootstrap_complete:
+    try:
         st.session_state.prices_data = fetch_price_map()
         st.session_state.prices_loaded_at = now_ts
-        prices_updated = True
+    except Exception:
+        pass
 
-# Fear & Greed is refreshed only where risk/sentiment calculations need it.
-if need_fear_greed:
-    fg_stale = (
-        st.session_state.fear_greed_loaded_at <= 0
-        or (now_ts - st.session_state.fear_greed_loaded_at) >= MARKET_REFRESH_SECONDS
-    )
-    if fg_stale:
+    try:
         st.session_state.fear_greed_data = fetch_fear_greed()
         st.session_state.fear_greed_loaded_at = now_ts
-        fear_greed_updated = True
+    except Exception:
+        pass
 
-# News is loaded only on Home (for the preview) and News pages.
-# Other views simply reuse the most recent news snapshot if one exists.
-if need_news:
-    news_stale = (
-        st.session_state.news_loaded_at <= 0
-        or (now_ts - st.session_state.news_loaded_at) >= NEWS_REFRESH_SECONDS
-        or st.session_state.news_loaded_query != news_query
-        or st.session_state.force_news_refresh
-    )
-    if news_stale:
-        with st.spinner("Refreshing market news..."):
-            st.session_state.news_data = fetch_news_articles(news_query, GNEWS_API_KEY)
+    try:
+        st.session_state.news_data = fetch_news_articles(news_query, GNEWS_API_KEY)
         st.session_state.news_loaded_at = now_ts
         st.session_state.news_loaded_query = news_query
-        st.session_state.force_news_refresh = False
-        news_updated = True
+    except Exception:
+        pass
 
-# Dedicated market overview is fetched only on the Market page.
-# It is independent of the blockchain scan, so opening Market never causes
-# Ethereum/Bitcoin transaction APIs to refresh.
-if nav_view == "market":
-    market_overview_stale = (
-        st.session_state.market_overview_loaded_at <= 0
-        or (
-            now_ts - st.session_state.market_overview_loaded_at
-        ) >= MARKET_REFRESH_SECONDS
-    )
-
-    if market_overview_stale:
+    try:
         st.session_state.market_overview_data = fetch_market_overview()
         st.session_state.market_overview_loaded_at = now_ts
+    except Exception:
+        pass
+
+    st.session_state.session_bootstrap_complete = True
+
+# Settings may explicitly request a news refresh after changing the query.
+if st.session_state.force_news_refresh:
+    try:
+        st.session_state.news_data = fetch_news_articles(news_query, GNEWS_API_KEY)
+        st.session_state.news_loaded_at = time.time()
+        st.session_state.news_loaded_query = news_query
+    finally:
+        st.session_state.force_news_refresh = False
 
 prices = st.session_state.prices_data
 fg = st.session_state.fear_greed_data
@@ -9445,149 +9959,141 @@ news_df = st.session_state.news_data
 market_overview_df = st.session_state.market_overview_data
 
 # ---------------------------------------------------------
-# MARKET PAGE
+# BLOCKCHAIN INDEXING — ONCE PER SESSION / MANUAL REFRESH
 # ---------------------------------------------------------
-# At this point the CoinGecko price variables exist.
-# Render Market here and stop immediately so:
-#   1. no NameError can occur,
-#   2. Market never appears underneath Home,
-#   3. opening Market never continues into blockchain ingestion.
-if nav_view == "market":
-    render_market_page(prices, market_overview_df)
-    st.stop()
-
-# Network fetch signature contains only settings that actually change which
-# blockchain transactions are requested. Whale Threshold is deliberately not
-# included because threshold-only changes can rescore stored raw transactions.
-network_fetch_signature = (
-    auto_erc20,
-    eth_blocks,
-    btc_blocks,
-    btc_txs_per_block,
-)
-
-network_refreshed = False
-network_rescored = False
-
-if need_network:
-    network_stale = (
-        st.session_state.network_loaded_at <= 0
-        or (now_ts - st.session_state.network_loaded_at) >= NETWORK_REFRESH_SECONDS
-        or st.session_state.network_fetch_signature != network_fetch_signature
+# If Streamlit slept and many blocks were missed, NOVARIS intentionally skips
+# the old gap and indexes only the latest configured window. This keeps startup
+# bounded and is the accepted deployment limitation for this capstone.
+should_index_now = (
+    nav_view == "home"
+    and (
+        not st.session_state.session_index_attempted
         or st.session_state.force_network_refresh
     )
+)
 
-    if network_stale:
-        with st.spinner("Refreshing blockchain transactions..."):
-            eth_native_df, eth_native_warn = fetch_eth_network_native(
-                eth_blocks,
-                prices.get("ETH"),
+network_final = st.session_state.network_final_df
+network_warnings = list(st.session_state.network_warnings)
+
+if should_index_now:
+    st.session_state.session_index_attempted = True
+    st.session_state.force_network_refresh = False
+
+    index_warnings = []
+    index_meta = {
+        "eth_from": None,
+        "eth_to": None,
+        "btc_from": None,
+        "btc_to": None,
+    }
+
+    try:
+        eth_tip = get_eth_tip_height()
+        eth_last = get_index_checkpoint(CHAIN_ETH)
+        eth_from, eth_to, eth_gap_warning = choose_index_range(
+            eth_tip, eth_last, eth_blocks, CHAIN_ETH
+        )
+        if eth_gap_warning:
+            index_warnings.append(eth_gap_warning)
+        index_meta["eth_from"] = eth_from
+        index_meta["eth_to"] = eth_to
+    except Exception as exc:
+        eth_from = eth_to = None
+        index_warnings.append(f"Ethereum tip lookup failed: {exc}")
+
+    try:
+        btc_tip, btc_base = get_btc_tip_height()
+        btc_last = get_index_checkpoint(CHAIN_BTC)
+        btc_from, btc_to, btc_gap_warning = choose_index_range(
+            btc_tip, btc_last, btc_blocks, CHAIN_BTC
+        )
+        if btc_gap_warning:
+            index_warnings.append(btc_gap_warning)
+        index_meta["btc_from"] = btc_from
+        index_meta["btc_to"] = btc_to
+    except Exception as exc:
+        btc_from = btc_to = None
+        btc_base = None
+        index_warnings.append(f"Bitcoin tip lookup failed: {exc}")
+
+    has_new_blocks = any(
+        value is not None
+        for value in [eth_from, eth_to, btc_from, btc_to]
+    )
+
+    if has_new_blocks:
+        with st.spinner("Indexing latest blockchain blocks..."):
+            eth_native_df, eth_native_warn = fetch_eth_native_range(
+                eth_from, eth_to, prices.get("ETH")
             )
-            eth_erc20_df, eth_erc20_warn = fetch_eth_network_erc20(
-                eth_blocks,
-                prices,
-                enabled=auto_erc20,
+            eth_erc20_df, eth_erc20_warn = fetch_eth_erc20_range(
+                eth_from, eth_to, prices, enabled=auto_erc20
             )
-            btc_network_df, btc_warn = fetch_btc_network_whales(
-                btc_blocks,
+            btc_network_df, btc_warn = fetch_btc_range(
+                btc_from,
+                btc_to,
                 prices.get("BTC"),
                 btc_txs_per_block,
+                preferred_base=btc_base,
             )
+
+            index_warnings.extend(eth_native_warn + eth_erc20_warn + btc_warn)
 
             network_raw = pd.concat(
                 [eth_native_df, eth_erc20_df, btc_network_df],
                 ignore_index=True,
             ) if any(
-                not df.empty
-                for df in [eth_native_df, eth_erc20_df, btc_network_df]
+                not df.empty for df in [eth_native_df, eth_erc20_df, btc_network_df]
             ) else empty_alert_df()
 
-        st.session_state.network_raw_df = network_raw
-        st.session_state.network_loaded_at = now_ts
-        st.session_state.network_fetch_signature = network_fetch_signature
-        st.session_state.network_warnings = (
-            eth_native_warn + eth_erc20_warn + btc_warn
-        )
-        st.session_state.force_network_refresh = False
-        network_refreshed = True
-
-    # Score stored raw transactions only if the raw snapshot or threshold changed.
-    if (
-        network_refreshed
-        or st.session_state.network_score_threshold != whale_threshold
-        or st.session_state.network_scored_df is None
-    ):
-        st.session_state.network_scored_df = score_alerts(
-            st.session_state.network_raw_df,
-            whale_threshold,
-        )
-        st.session_state.network_score_threshold = whale_threshold
-        network_rescored = True
-
-    # Re-fuse sentiment when the underlying transactions/scores or market/news
-    # context changed. This does NOT query the blockchains again.
-    fusion_signature = (
-        st.session_state.network_loaded_at,
-        st.session_state.network_score_threshold,
-        st.session_state.news_loaded_at,
-        st.session_state.fear_greed_loaded_at,
-    )
-
-    if (
-        network_refreshed
-        or network_rescored
-        or news_updated
-        or fear_greed_updated
-        or st.session_state.network_fusion_signature != fusion_signature
-    ):
-        network_final = fuse_sentiment(
-            st.session_state.network_scored_df,
-            news_df,
-            fg,
-        )
-        network_final = (
-            network_final.sort_values(
-                ["timestamp", "amount_usd"],
-                ascending=[False, False],
-            ).reset_index(drop=True)
-            if not network_final.empty
-            else empty_alert_df()
-        )
-        st.session_state.network_final_df = network_final
-        st.session_state.network_fusion_signature = fusion_signature
-
-        # Phase 1: write only genuinely fresh blockchain scans to PostgreSQL.
-        # Normal navigation reruns do not create new scan records.
-        if network_refreshed:
-            persist_network_snapshot(
-                df=network_final,
-                eth_blocks=eth_blocks,
-                btc_blocks=btc_blocks,
-                btc_txs_per_block=btc_txs_per_block,
-                include_erc20=auto_erc20,
-                warnings=st.session_state.network_warnings,
+            scored = score_alerts(network_raw, whale_threshold)
+            network_final = fuse_sentiment(scored, news_df, fg)
+            network_final = (
+                network_final.sort_values(
+                    ["timestamp", "amount_usd"],
+                    ascending=[False, False],
+                ).reset_index(drop=True)
+                if not network_final.empty
+                else empty_alert_df()
             )
+
+            scan_id = persist_index_batch(
+                df=network_final,
+                meta=index_meta,
+                warnings=index_warnings,
+                include_erc20=auto_erc20,
+                btc_txs_per_block=btc_txs_per_block,
+            )
+
+            if scan_id is not None:
+                st.session_state.network_raw_df = network_raw
+                st.session_state.network_scored_df = scored
+                st.session_state.network_final_df = network_final
+                st.session_state.network_loaded_at = time.time()
+                st.session_state.network_warnings = index_warnings
+                st.session_state.db_cache_loaded = False
+
+# ---------------------------------------------------------
+# DATABASE -> SESSION CACHE
+# ---------------------------------------------------------
+# PostgreSQL is the source of truth. We query it once after indexing / on a new
+# session, then every nav tab reuses the in-memory display DataFrames.
+if not st.session_state.db_cache_loaded:
+    refresh_session_db_cache(eth_blocks=eth_blocks, btc_blocks=btc_blocks)
+
+network_display_df = st.session_state.db_network_cache_df
+if network_display_df is None or network_display_df.empty:
+    # Fail-open fallback if DB is temporarily unavailable or still empty.
+    network_display_df = st.session_state.network_final_df
 
 network_final = st.session_state.network_final_df
 network_warnings = list(st.session_state.network_warnings)
 
-# =========================================================
-# PHASE 2 — DATABASE-BACKED NETWORK DISPLAY SNAPSHOT
-# =========================================================
-# PostgreSQL is the preferred source for Home, Alerts and Transfers.
-# If Neon is temporarily unavailable, NOVARIS falls back to the current
-# in-memory DataFrame rather than taking the dashboard offline.
-db_network_snapshot, db_snapshot_scan_id = load_latest_db_snapshot()
-
-if db_network_snapshot is not None:
-    network_display_df = db_network_snapshot
-    st.session_state.db_display_scan_id = db_snapshot_scan_id
-    st.session_state.db_using_fallback = False
-else:
-    network_display_df = network_final
-    st.session_state.db_display_scan_id = None
-    st.session_state.db_using_fallback = True
-
+# Market is now a pure display route: no API or blockchain request is triggered
+# by clicking the Market tab.
+if nav_view == "market":
+    render_market_page(prices, market_overview_df)
+    st.stop()
 
 # =========================================================
 # WATCHLIST — RUN ONLY ON EXPLICIT SUBMIT
