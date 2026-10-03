@@ -6439,6 +6439,8 @@ def create_scan_run(
 
     sql = text("""
         INSERT INTO scan_runs (
+            status,
+            completed_at,
             eth_blocks,
             btc_blocks,
             btc_txs_per_block,
@@ -6447,6 +6449,8 @@ def create_scan_run(
             warning_text
         )
         VALUES (
+            'running',
+            NULL,
             :eth_blocks,
             :btc_blocks,
             :btc_txs_per_block,
@@ -6649,6 +6653,24 @@ def persist_network_snapshot(
 
         stored_count = save_transactions_to_db(df, scan_id)
 
+        # A scan becomes visible to Phase 2 readers only after every
+        # transaction upsert has completed successfully.
+        with db_engine.begin() as connection:
+            connection.execute(
+                text("""
+                    UPDATE scan_runs
+                    SET
+                        status = 'success',
+                        completed_at = NOW(),
+                        transaction_count = :transaction_count
+                    WHERE id = :scan_id
+                """),
+                {
+                    "scan_id": int(scan_id),
+                    "transaction_count": int(stored_count),
+                },
+            )
+
         st.session_state.db_last_scan_id = scan_id
         st.session_state.db_last_stored_count = stored_count
         st.session_state.db_last_saved_at = time.time()
@@ -6657,8 +6679,183 @@ def persist_network_snapshot(
         return scan_id
 
     except Exception as exc:
+        # If a scan row was created but persistence failed, mark it failed so
+        # it cannot replace the latest known-good dashboard snapshot.
+        try:
+            if db_engine is not None and "scan_id" in locals() and scan_id is not None:
+                with db_engine.begin() as connection:
+                    connection.execute(
+                        text("""
+                            UPDATE scan_runs
+                            SET
+                                status = 'failed',
+                                completed_at = NOW(),
+                                warning_text = CASE
+                                    WHEN warning_text IS NULL OR warning_text = ''
+                                        THEN :error_text
+                                    ELSE warning_text || E'\\n' || :error_text
+                                END
+                            WHERE id = :scan_id
+                        """),
+                        {
+                            "scan_id": int(scan_id),
+                            "error_text": f"Database persistence failed: {exc}",
+                        },
+                    )
+        except Exception:
+            pass
+
         st.session_state.db_last_error = str(exc)
         return None
+
+
+def db_query_dataframe(sql, params=None):
+    """Run a PostgreSQL SELECT and return a DataFrame; None means DB failure."""
+    if db_engine is None:
+        return None
+
+    try:
+        with db_engine.connect() as connection:
+            df = pd.read_sql_query(
+                text(sql),
+                connection,
+                params=params or {},
+            )
+        st.session_state.db_last_read_error = ""
+        return df
+    except Exception as exc:
+        st.session_state.db_last_read_error = str(exc)
+        return None
+
+
+def normalize_db_transactions(df):
+    """Map PostgreSQL transaction columns back to the existing NOVARIS schema."""
+    if df is None:
+        return None
+
+    if df.empty:
+        return empty_alert_df()
+
+    out = df.copy().rename(
+        columns={
+            "from_address": "from",
+            "to_address": "to",
+        }
+    )
+
+    for col in REQUIRED_COLUMNS:
+        if col not in out.columns:
+            out[col] = None
+
+    out["timestamp"] = pd.to_datetime(
+        out["timestamp"],
+        utc=True,
+        errors="coerce",
+    )
+
+    for numeric_col in [
+        "amount_native",
+        "amount_usd",
+        "base_score",
+        "news_sentiment_score",
+        "fear_greed_score",
+        "combined_sentiment_score",
+        "final_score",
+    ]:
+        if numeric_col in out.columns:
+            out[numeric_col] = pd.to_numeric(
+                out[numeric_col],
+                errors="coerce",
+            )
+
+    out = out.dropna(subset=["timestamp"])
+
+    if not out.empty:
+        out = out.sort_values(
+            ["timestamp", "amount_usd"],
+            ascending=[False, False],
+            na_position="last",
+        ).reset_index(drop=True)
+
+    return out
+
+
+def load_latest_db_snapshot():
+    """Return the latest successful network scan from PostgreSQL."""
+    meta_df = db_query_dataframe(
+        """
+        SELECT id
+        FROM scan_runs
+        WHERE status = 'success'
+        ORDER BY id DESC
+        LIMIT 1
+        """
+    )
+
+    if meta_df is None:
+        return None, None
+
+    if meta_df.empty:
+        return empty_alert_df(), None
+
+    scan_id = int(meta_df.iloc[0]["id"])
+
+    tx_df = db_query_dataframe(
+        """
+        SELECT t.*
+        FROM transactions t
+        WHERE t.last_seen_scan_id = :scan_id
+        ORDER BY t.timestamp DESC, t.amount_usd DESC NULLS LAST
+        """,
+        {"scan_id": scan_id},
+    )
+
+    return normalize_db_transactions(tx_df), scan_id
+
+
+def load_db_timeline_history(days=7):
+    """Return persistent network history for the timeline."""
+    try:
+        days = max(1, min(int(days), 30))
+    except Exception:
+        days = 7
+
+    start_ts = (
+        pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=days)
+    ).to_pydatetime()
+
+    tx_df = db_query_dataframe(
+        """
+        SELECT t.*
+        FROM transactions t
+        WHERE
+            t.timestamp >= :start_ts
+            AND COALESCE(t.source_type, 'network') = 'network'
+        ORDER BY t.timestamp ASC
+        """,
+        {"start_ts": start_ts},
+    )
+
+    return normalize_db_transactions(tx_df)
+
+
+def load_transaction_from_db(tx_hash):
+    """Load a transaction from persistent history by hash."""
+    tx_hash = str(tx_hash or "").strip()
+    if not tx_hash:
+        return empty_alert_df()
+
+    tx_df = db_query_dataframe(
+        """
+        SELECT t.*
+        FROM transactions t
+        WHERE LOWER(t.tx_hash) = LOWER(:tx_hash)
+        ORDER BY t.timestamp DESC, t.id DESC
+        """,
+        {"tx_hash": tx_hash},
+    )
+
+    return normalize_db_transactions(tx_df)
 
 
 def empty_alert_df():
@@ -9374,6 +9571,23 @@ if need_network:
 network_final = st.session_state.network_final_df
 network_warnings = list(st.session_state.network_warnings)
 
+# =========================================================
+# PHASE 2 — DATABASE-BACKED NETWORK DISPLAY SNAPSHOT
+# =========================================================
+# PostgreSQL is the preferred source for Home, Alerts and Transfers.
+# If Neon is temporarily unavailable, NOVARIS falls back to the current
+# in-memory DataFrame rather than taking the dashboard offline.
+db_network_snapshot, db_snapshot_scan_id = load_latest_db_snapshot()
+
+if db_network_snapshot is not None:
+    network_display_df = db_network_snapshot
+    st.session_state.db_display_scan_id = db_snapshot_scan_id
+    st.session_state.db_using_fallback = False
+else:
+    network_display_df = network_final
+    st.session_state.db_display_scan_id = None
+    st.session_state.db_using_fallback = True
+
 
 # =========================================================
 # WATCHLIST — RUN ONLY ON EXPLICIT SUBMIT
@@ -9421,10 +9635,10 @@ eth_watch_df = st.session_state.eth_watch_df
 btc_watch_df = st.session_state.btc_watch_df
 
 all_alerts_df = pd.concat(
-    [network_final, watchlist_final_df],
+    [network_display_df, watchlist_final_df],
     ignore_index=True,
 ) if any(
-    not df.empty for df in [network_final, watchlist_final_df]
+    not df.empty for df in [network_display_df, watchlist_final_df]
 ) else empty_alert_df()
 
 all_alerts_df = (
@@ -9455,7 +9669,31 @@ if need_network:
 # =========================================================
 with main_col:
     if selected_tx_hash:
-        render_transaction_detail_page(selected_tx_hash, all_alerts_df)
+        detail_df = all_alerts_df
+
+        current_match = (
+            not detail_df.empty
+            and "tx_hash" in detail_df.columns
+            and detail_df["tx_hash"].astype(str).str.lower().eq(
+                selected_tx_hash.lower()
+            ).any()
+        )
+
+        # Historical details remain available even after a transaction moves
+        # outside the latest monitoring snapshot.
+        if not current_match:
+            historical_detail_df = load_transaction_from_db(selected_tx_hash)
+
+            if (
+                historical_detail_df is not None
+                and not historical_detail_df.empty
+            ):
+                detail_df = pd.concat(
+                    [historical_detail_df, detail_df],
+                    ignore_index=True,
+                )
+
+        render_transaction_detail_page(selected_tx_hash, detail_df)
         st.stop()
 
     if nav_view == "alerts":
@@ -9729,11 +9967,25 @@ with main_col:
                 unsafe_allow_html=True,
             )
 
-            if all_alerts_df.empty:
+            db_timeline_df = load_db_timeline_history(days=7)
+
+            # PostgreSQL is authoritative whenever the query succeeds. Only a
+            # DB failure falls back to the current snapshot. Watchlist searches
+            # remain session-only and are overlaid when present.
+            if db_timeline_df is None:
+                timeline_df = all_alerts_df.copy()
+            else:
+                timeline_df = db_timeline_df.copy()
+
+                if not watchlist_final_df.empty:
+                    timeline_df = pd.concat(
+                        [timeline_df, watchlist_final_df],
+                        ignore_index=True,
+                    )
+
+            if timeline_df.empty:
                 st.info("No transaction data to display.")
             else:
-                timeline_df = all_alerts_df.copy()
-
                 # Normalize timestamps before applying the selected time window.
                 timeline_df["timestamp"] = pd.to_datetime(
                     timeline_df["timestamp"],
@@ -9742,8 +9994,8 @@ with main_col:
                 )
                 timeline_df = timeline_df.dropna(subset=["timestamp"])
 
-                # Keep all currently available transaction history in the
-                # Plotly figure. The timeframe controls below operate entirely
+                # Keep the persisted last 7 days of PostgreSQL history in
+                # the Plotly figure. The timeframe controls below operate entirely
                 # in the browser, so clicking them does not rerun Streamlit or
                 # refetch any blockchain/API data.
                 timeline_end = (
