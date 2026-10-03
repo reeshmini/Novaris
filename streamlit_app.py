@@ -6799,6 +6799,195 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   PREMIUM KPI ARROW BUTTONS — FINAL POLISH
+   ========================================================= */
+
+/* Slightly tighter placement so the action feels integrated with the card. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+    inset: 50% 14px auto auto !important;
+}
+
+/* Premium compact circular control. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page [data-testid^="stBaseButton"],
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page [data-testid^="stBaseButton"],
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page [data-testid^="stBaseButton"] {
+    position: relative !important;
+
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(240,184,70,0.48) !important;
+
+    background:
+        radial-gradient(
+            circle at 34% 24%,
+            rgba(255,220,145,0.10),
+            rgba(255,178,30,0.045) 34%,
+            transparent 58%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(27,24,18,0.98) 0%,
+            rgba(11,10,8,1) 100%
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,237,193,0.10),
+        inset 0 -1px 0 rgba(255,178,30,0.04),
+        0 0 0 1px rgba(255,178,30,0.025),
+        0 0 12px rgba(255,178,30,0.10),
+        0 7px 18px rgba(0,0,0,0.34) !important;
+
+    color: #F6C45F !important;
+    cursor: pointer !important;
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease !important;
+}
+
+/* Fine inner ring for a more premium hardware-control feel. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button::before,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button::before,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 4px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,210,112,0.08) !important;
+    pointer-events: none !important;
+}
+
+/* Use a slimmer, better-balanced arrow. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button p {
+    position: relative !important;
+    z-index: 2 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #F6C45F !important;
+
+    font-family: Inter, "Segoe UI Symbol", Arial, sans-serif !important;
+    font-size: 1.56rem !important;
+    font-weight: 650 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.03em !important;
+
+    transform: translate(-0.5px, -1px) !important;
+
+    text-shadow:
+        0 0 4px rgba(246,196,95,0.32),
+        0 0 9px rgba(255,178,30,0.14) !important;
+
+    transition:
+        transform 0.18s ease,
+        color 0.18s ease,
+        text-shadow 0.18s ease !important;
+}
+
+/* Premium hover: controlled glow, no cartoon-like scaling. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:hover,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:hover,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:hover,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:focus-visible,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:focus-visible,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:focus-visible {
+    transform: translateY(-1px) !important;
+
+    border-color: rgba(255,211,106,0.72) !important;
+
+    background:
+        radial-gradient(
+            circle at 34% 24%,
+            rgba(255,229,165,0.16),
+            rgba(255,178,30,0.085) 36%,
+            transparent 60%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(38,31,18,0.99) 0%,
+            rgba(14,11,7,1) 100%
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,240,202,0.15),
+        inset 0 -1px 0 rgba(255,178,30,0.06),
+        0 0 0 1px rgba(255,178,30,0.05),
+        0 0 16px rgba(255,178,30,0.18),
+        0 9px 22px rgba(0,0,0,0.40) !important;
+}
+
+/* Arrow glides slightly to the right on hover. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:hover p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:hover p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:hover p,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:focus-visible p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:focus-visible p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:focus-visible p {
+    color: #FFD978 !important;
+    transform: translate(1.5px, -1px) !important;
+    text-shadow:
+        0 0 5px rgba(255,217,120,0.42),
+        0 0 11px rgba(255,178,30,0.18) !important;
+}
+
+/* Pressed state. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:active,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:active,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:active {
+    transform: translateY(0) scale(0.97) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,240,202,0.10),
+        0 0 10px rgba(255,178,30,0.12),
+        0 5px 14px rgba(0,0,0,0.34) !important;
+}
+
+/* Keep the action area compact on smaller screens. */
+@media (max-width: 1200px) {
+    .st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+    .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+    .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+        inset: 50% 12px auto auto !important;
+    }
+
+    .st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button,
+    .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button,
+    .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button {
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+    }
+
+    .st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button p,
+    .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button p,
+    .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button p {
+        font-size: 1.42rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
