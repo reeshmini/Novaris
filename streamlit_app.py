@@ -6545,6 +6545,240 @@ information icon. This preserves both full-card navigation and tooltip hover.
     max-width: 390px !important;
 }
 
+
+/* =========================================================
+   TOP KPI NAVIGATION — BUTTON ONLY, CARD IS NOT CLICKABLE
+   ========================================================= */
+
+/* The KPI shells are visual containers only. */
+.st-key-whale_alerts_kpi_clickable,
+.st-key-eth_market_kpi_clickable,
+.st-key-btc_market_kpi_clickable {
+    position: relative !important;
+    cursor: default !important;
+}
+
+/* Leave enough breathing room for the navigation button on the right. */
+.st-key-whale_alerts_kpi_clickable .metric-card.compact-kpi,
+.st-key-eth_market_kpi_clickable .metric-card.compact-kpi,
+.st-key-btc_market_kpi_clickable .metric-card.compact-kpi {
+    padding-right: 88px !important;
+}
+
+/* Undo the old full-card overlay and place the Streamlit button only
+   in the right-side action area. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+    position: absolute !important;
+    top: 50% !important;
+    right: 18px !important;
+    bottom: auto !important;
+    left: auto !important;
+    inset: auto !important;
+    transform: translateY(-50%) !important;
+
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    z-index: 120 !important;
+
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    pointer-events: auto !important;
+}
+
+/* Reset Streamlit's intermediate button wrappers from the old overlay. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page .stButton,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page .stButton,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page .stButton,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page [data-testid="stButton"],
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page [data-testid="stButton"],
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page [data-testid="stButton"] {
+    position: static !important;
+    inset: auto !important;
+
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+}
+
+/* Visible premium circular arrow button. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page [data-testid^="stBaseButton"],
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page [data-testid^="stBaseButton"],
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page [data-testid^="stBaseButton"] {
+    position: static !important;
+    inset: auto !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+
+    margin: 0 !important;
+    padding: 0 0 3px 0 !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,178,30,0.34) !important;
+    outline: 0 !important;
+
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255,178,30,0.10), transparent 44%),
+        linear-gradient(180deg, rgba(25,25,25,0.98), rgba(9,9,9,1)) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.055),
+        0 0 0 1px rgba(255,178,30,0.025),
+        0 0 14px rgba(255,178,30,0.10),
+        0 8px 18px rgba(0,0,0,0.34) !important;
+
+    color: #FFB21E !important;
+    opacity: 1 !important;
+    filter: none !important;
+
+    cursor: pointer !important;
+    pointer-events: auto !important;
+
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease !important;
+}
+
+/* Restore the arrow glyph; older overlay CSS hid every button child. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button *,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button *,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button * {
+    opacity: 1 !important;
+    color: #FFB21E !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Arrow appearance. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button p {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #FFB21E !important;
+    opacity: 1 !important;
+
+    font-family: Inter, "Segoe UI Symbol", Arial, sans-serif !important;
+    font-size: 2.15rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.08em !important;
+
+    transform: translateX(-1px) !important;
+
+    text-shadow:
+        0 0 5px rgba(255,178,30,0.42),
+        0 0 11px rgba(255,145,0,0.18) !important;
+}
+
+/* Button-only hover/focus feedback. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:hover,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:hover,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:hover,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:focus-visible,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:focus-visible,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:focus-visible {
+    opacity: 1 !important;
+    transform: translateX(2px) scale(1.055) !important;
+
+    border-color: rgba(255,199,92,0.72) !important;
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255,190,60,0.18), transparent 46%),
+        linear-gradient(180deg, rgba(34,28,18,0.99), rgba(12,10,7,1)) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,230,170,0.10),
+        0 0 0 1px rgba(255,178,30,0.06),
+        0 0 18px rgba(255,178,30,0.24),
+        0 9px 20px rgba(0,0,0,0.40) !important;
+}
+
+/* The card itself is not an interaction target. */
+.st-key-whale_alerts_kpi_clickable .metric-card,
+.st-key-eth_market_kpi_clickable .metric-card,
+.st-key-btc_market_kpi_clickable .metric-card {
+    cursor: default !important;
+}
+
+/* Do not hide button help/tooltips now that these are real visible controls. */
+.st-key-whale_alerts_kpi_clickable [data-testid="stTooltipIcon"],
+.st-key-eth_market_kpi_clickable [data-testid="stTooltipIcon"],
+.st-key-btc_market_kpi_clickable [data-testid="stTooltipIcon"] {
+    display: initial !important;
+}
+
+@media (max-width: 1200px) {
+    .st-key-whale_alerts_kpi_clickable .metric-card.compact-kpi,
+    .st-key-eth_market_kpi_clickable .metric-card.compact-kpi,
+    .st-key-btc_market_kpi_clickable .metric-card.compact-kpi {
+        padding-right: 76px !important;
+    }
+
+    .st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+    .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+    .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+        right: 14px !important;
+        width: 46px !important;
+        min-width: 46px !important;
+        max-width: 46px !important;
+        height: 46px !important;
+        min-height: 46px !important;
+        max-height: 46px !important;
+    }
+
+    .st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button,
+    .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button,
+    .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button {
+        width: 46px !important;
+        min-width: 46px !important;
+        max-width: 46px !important;
+        height: 46px !important;
+        min-height: 46px !important;
+        max-height: 46px !important;
+    }
+
+    .st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button p,
+    .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button p,
+    .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button p {
+        font-size: 1.90rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -10577,8 +10811,9 @@ with main_col:
             )
 
             st.button(
-                "WHALE ALERTS",
+                "→",
                 key="open_whale_alerts_page",
+                help="Open Whale Alerts",
                 on_click=set_nav_view,
                 args=("whales",),
             )
@@ -10596,8 +10831,9 @@ with main_col:
             )
 
             st.button(
-                "Open Ethereum Market",
+                "→",
                 key="open_eth_market_page",
+                help="Open Ethereum Market",
                 on_click=set_nav_view,
                 args=("market",),
             )
@@ -10615,8 +10851,9 @@ with main_col:
             )
 
             st.button(
-                "Open Bitcoin Market",
+                "→",
                 key="open_btc_market_page",
+                help="Open Bitcoin Market",
                 on_click=set_nav_view,
                 args=("market",),
             )
