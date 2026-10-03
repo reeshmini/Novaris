@@ -6520,6 +6520,21 @@ information icon. This preserves both full-card navigation and tooltip hover.
     right: 10px !important;
 }
 
+/* Lower-home card headings use the same information tooltip treatment. */
+.home-alerts-title .metric-info-tooltip,
+.home-compact-title .metric-info-tooltip {
+    margin-left: 1px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Keep the tooltip bubbles readable within the lower dashboard cards. */
+.st-key-home_alerts_panel .metric-tooltip-bubble,
+.st-key-home_timeline_card .metric-tooltip-bubble,
+.st-key-home_news_preview_card .metric-tooltip-bubble {
+    min-width: 280px !important;
+    max-width: 390px !important;
+}
+
 /* Fear & Greed title uses the same information treatment. */
 .fg-index-title-row {
     gap: 8px !important;
@@ -7847,19 +7862,27 @@ def render_home_news_preview(news_df: pd.DataFrame):
         news_heading_col, news_action_col = st.columns([5.3, 1.0], gap="small")
 
         with news_heading_col:
+            market_news_tooltip = metric_tooltip_html(
+                "Displays recent cryptocurrency and blockchain-related news from external "
+                "news sources to provide market context alongside on-chain activity."
+            )
+
             st.markdown(
-                '<div class="home-panel-title home-compact-title">'
-                '<span class="home-news-title-icon">'
-                '<svg viewBox="0 0 24 24" aria-hidden="true">'
-                '<rect x="4" y="3.5" width="16" height="17" rx="2.5"></rect>'
-                '<rect x="7" y="7" width="3.2" height="3.2" rx="0.45"></rect>'
-                '<line x1="12.4" y1="8.6" x2="17" y2="8.6"></line>'
-                '<line x1="7" y1="13" x2="17" y2="13"></line>'
-                '<line x1="7" y1="16.6" x2="17" y2="16.6"></line>'
-                '</svg>'
-                '</span>'
-                '<span>MARKET NEWS</span>'
-                '</div>',
+                (
+                    '<div class="home-panel-title home-compact-title">'
+                    '<span class="home-news-title-icon">'
+                    '<svg viewBox="0 0 24 24" aria-hidden="true">'
+                    '<rect x="4" y="3.5" width="16" height="17" rx="2.5"></rect>'
+                    '<rect x="7" y="7" width="3.2" height="3.2" rx="0.45"></rect>'
+                    '<line x1="12.4" y1="8.6" x2="17" y2="8.6"></line>'
+                    '<line x1="7" y1="13" x2="17" y2="13"></line>'
+                    '<line x1="7" y1="16.6" x2="17" y2="16.6"></line>'
+                    '</svg>'
+                    '</span>'
+                    '<span>MARKET NEWS</span>'
+                    f'{market_news_tooltip}'
+                    '</div>'
+                ),
                 unsafe_allow_html=True,
             )
 
@@ -10617,18 +10640,27 @@ with main_col:
             alerts_heading_col, alerts_action_col = st.columns([5.3, 1.0], gap="small")
 
             with alerts_heading_col:
+                latest_transfers_tooltip = metric_tooltip_html(
+                    "Displays the most recent Bitcoin and Ethereum transactions detected by "
+                    "Novaris, including the transferred amount, estimated USD value, network "
+                    "and transaction time."
+                )
+
                 st.markdown(
-                    '<div class="home-panel-title home-alerts-title">'
-                    '<span class="home-alerts-bell">'
-                    '<svg viewBox="0 0 24 24" aria-hidden="true">'
-                    '<path d="M4 8h12"></path>'
-                    '<path d="m13 5 3 3-3 3"></path>'
-                    '<path d="M20 16H8"></path>'
-                    '<path d="m11 13-3 3 3 3"></path>'
-                    '</svg>'
-                    '</span>'
-                    '<span>LATEST TRANSFERS</span>'
-                    '</div>',
+                    (
+                        '<div class="home-panel-title home-alerts-title">'
+                        '<span class="home-alerts-bell">'
+                        '<svg viewBox="0 0 24 24" aria-hidden="true">'
+                        '<path d="M4 8h12"></path>'
+                        '<path d="m13 5 3 3-3 3"></path>'
+                        '<path d="M20 16H8"></path>'
+                        '<path d="m11 13-3 3 3 3"></path>'
+                        '</svg>'
+                        '</span>'
+                        '<span>LATEST TRANSFERS</span>'
+                        f'{latest_transfers_tooltip}'
+                        '</div>'
+                    ),
                     unsafe_allow_html=True,
                 )
 
@@ -10723,10 +10755,19 @@ with main_col:
     with right_col:
         # Transaction Timeline
         with st.container(border=True, key="home_timeline_card"):
+            timeline_tooltip = metric_tooltip_html(
+                "Visualises detected Bitcoin and Ethereum transactions over time based on "
+                "their estimated USD value. Use the timeframe options to view activity "
+                "across different periods."
+            )
+
             st.markdown(
-                '<div class="home-panel-title home-compact-title">'
-                'TRANSACTION TIMELINE (USD VALUE)'
-                '</div>',
+                (
+                    '<div class="home-panel-title home-compact-title">'
+                    '<span>TRANSACTION TIMELINE (USD VALUE)</span>'
+                    f'{timeline_tooltip}'
+                    '</div>'
+                ),
                 unsafe_allow_html=True,
             )
 
