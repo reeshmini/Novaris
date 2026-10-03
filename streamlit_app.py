@@ -57,6 +57,14 @@ NETWORK_REFRESH_SECONDS = int((env_vars.get("NETWORK_REFRESH_SECONDS") or "120")
 MARKET_REFRESH_SECONDS = int((env_vars.get("MARKET_REFRESH_SECONDS") or "120").strip())
 NEWS_REFRESH_SECONDS = int((env_vars.get("NEWS_REFRESH_SECONDS") or "300").strip())
 
+# Final deployment mode: keep blockchain ingestion explicit so Streamlit
+# navigation remains fast. Set AUTO_INDEX_ON_SESSION_START=true only if you
+# prefer one blocking blockchain index pass whenever a new browser session starts.
+AUTO_INDEX_ON_SESSION_START = (
+    (env_vars.get("AUTO_INDEX_ON_SESSION_START") or "false").strip().lower()
+    in {"1", "true", "yes", "on"}
+)
+
 ETH_RPC_URLS = [x.strip() for x in (env_vars.get("ETH_RPC_URLS") or "").split(",") if x.strip()]
 DEFAULT_NEWS_QUERY = (
     env_vars.get("DEFAULT_NEWS_QUERY")
@@ -7291,8 +7299,16 @@ def persist_index_batch(df, meta, warnings, include_erc20, btc_txs_per_block):
 
         with db_engine.begin() as connection:
             stored_count = save_index_transactions_to_db(connection, df, scan_id)
-            update_index_checkpoint(connection, CHAIN_ETH, meta.get("eth_to"))
-            update_index_checkpoint(connection, CHAIN_BTC, meta.get("btc_to"))
+            update_index_checkpoint(
+                connection,
+                CHAIN_ETH,
+                meta.get("eth_checkpoint_to", meta.get("eth_to")),
+            )
+            update_index_checkpoint(
+                connection,
+                CHAIN_BTC,
+                meta.get("btc_checkpoint_to", meta.get("btc_to")),
+            )
             connection.execute(
                 text("""
                     UPDATE scan_runs
@@ -9510,12 +9526,18 @@ def render_monitoring_controls_page(prefs):
             }
 
             if any(old_prefs.get(k) != new_prefs.get(k) for k in fetch_keys):
-                st.session_state.force_network_refresh = True
+                # Rebuild only the lightweight DB-backed display window on the
+                # next rerun. Blockchain ingestion stays explicit via the
+                # "Index Latest Blocks Now" button so normal navigation remains fast.
+                st.session_state.db_cache_loaded = False
 
             if old_prefs.get("news_query") != new_prefs.get("news_query"):
                 st.session_state.force_news_refresh = True
 
-            st.success("Settings saved successfully.")
+            st.success(
+                "Settings saved. Blockchain-related changes will be used the next "
+                "time you select Index Latest Blocks Now."
+            )
 
         st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
         if st.button(
@@ -9604,9 +9626,10 @@ if "force_network_refresh" not in st.session_state:
 if "force_news_refresh" not in st.session_state:
     st.session_state.force_news_refresh = False
 
-# Final indexed architecture: expensive APIs/DB reads are performed once per
-# active browser session (or when explicitly refreshed), then navigation reuses
-# these session snapshots so tab changes remain fast.
+# Final indexed architecture: PostgreSQL is the persistent transaction store.
+# Lightweight DB/API snapshots are loaded once per active browser session and
+# then reused from session state so navigation does not repeat blockchain or DB
+# work. Blockchain ingestion is explicit by default.
 if "session_bootstrap_complete" not in st.session_state:
     st.session_state.session_bootstrap_complete = False
 if "session_index_attempted" not in st.session_state:
@@ -9756,7 +9779,7 @@ with main_col:
             "<span class='brand-spark'>✦</span>"
             "</div>"
             "<div class='brand-sub'>An intelligence console for live Bitcoin and Ethereum monitoring and signal detection.</div>"
-            "<div class='brand-mini'>Indexed blockchain data is stored in PostgreSQL; navigation reuses session snapshots for fast page switching.</div>"
+            "<div class='brand-mini'>Blockchain data is indexed into PostgreSQL; page navigation reuses session-cached views for fast switching.</div>"
             "</div>",
             unsafe_allow_html=True,
         )
@@ -9959,16 +9982,21 @@ news_df = st.session_state.news_data
 market_overview_df = st.session_state.market_overview_data
 
 # ---------------------------------------------------------
-# BLOCKCHAIN INDEXING — ONCE PER SESSION / MANUAL REFRESH
+# BLOCKCHAIN INDEXING — EXPLICIT, DATABASE-PERSISTED
 # ---------------------------------------------------------
-# If Streamlit slept and many blocks were missed, NOVARIS intentionally skips
-# the old gap and indexes only the latest configured window. This keeps startup
-# bounded and is the accepted deployment limitation for this capstone.
+# By default, opening or navigating NOVARIS never triggers blockchain RPC/API
+# work. Use Settings -> Index Latest Blocks Now to ingest the newest configured
+# block window. If Streamlit slept and blocks were missed, NOVARIS intentionally
+# skips the old gap and indexes only the latest configured window. This keeps
+# the dashboard responsive and is the accepted Streamlit deployment limitation.
 should_index_now = (
     nav_view == "home"
     and (
-        not st.session_state.session_index_attempted
-        or st.session_state.force_network_refresh
+        st.session_state.force_network_refresh
+        or (
+            AUTO_INDEX_ON_SESSION_START
+            and not st.session_state.session_index_attempted
+        )
     )
 )
 
@@ -10038,6 +10066,17 @@ if should_index_now:
             )
 
             index_warnings.extend(eth_native_warn + eth_erc20_warn + btc_warn)
+
+            # Checkpoints advance only for chains whose requested range was
+            # fetched successfully. If an API/RPC call fails, the checkpoint
+            # remains unchanged so the next explicit index pass can safely retry.
+            eth_fetch_ok = (
+                not eth_native_warn
+                and (not auto_erc20 or not eth_erc20_warn)
+            )
+            btc_fetch_ok = not btc_warn
+            index_meta["eth_checkpoint_to"] = eth_to if eth_fetch_ok else None
+            index_meta["btc_checkpoint_to"] = btc_to if btc_fetch_ok else None
 
             network_raw = pd.concat(
                 [eth_native_df, eth_erc20_df, btc_network_df],
@@ -10164,8 +10203,8 @@ big_alerts_df = (
     else empty_alert_df()
 )
 
-# Only surface network warnings on views that actually use the network feed.
-if need_network:
+# Only surface blockchain-index warnings on views that use the indexed feed.
+if nav_view in {"home", "alerts", "whales"}:
     for w in network_warnings:
         st.warning(w)
 
