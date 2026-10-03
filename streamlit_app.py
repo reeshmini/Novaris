@@ -9779,7 +9779,6 @@ with main_col:
             "<span class='brand-spark'>✦</span>"
             "</div>"
             "<div class='brand-sub'>An intelligence console for live Bitcoin and Ethereum monitoring and signal detection.</div>"
-            "<div class='brand-mini'>Blockchain data is indexed into PostgreSQL; page navigation reuses session-cached views for fast switching.</div>"
             "</div>",
             unsafe_allow_html=True,
         )
