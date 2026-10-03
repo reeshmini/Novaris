@@ -6571,11 +6571,8 @@ information icon. This preserves both full-card navigation and tooltip hover.
 .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
 .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
     position: absolute !important;
-    top: 50% !important;
-    right: 18px !important;
-    bottom: auto !important;
-    left: auto !important;
-    inset: auto !important;
+    /* Position the navigation control INSIDE the card at the far right. */
+    inset: 50% 18px auto auto !important;
     transform: translateY(-50%) !important;
 
     width: 52px !important;
@@ -6776,6 +6773,29 @@ information icon. This preserves both full-card navigation and tooltip hover.
     .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button p,
     .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button p {
         font-size: 1.90rem !important;
+    }
+}
+
+
+/* =========================================================
+   FINAL KPI ARROW POSITION FIX
+   ========================================================= */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+    position: absolute !important;
+    inset: 50% 18px auto auto !important;
+    transform: translateY(-50%) !important;
+    margin: 0 !important;
+    z-index: 200 !important;
+}
+
+@media (max-width: 1200px) {
+    .st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+    .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+    .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+        inset: 50% 14px auto auto !important;
+        transform: translateY(-50%) !important;
     }
 }
 
