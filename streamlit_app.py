@@ -8238,6 +8238,118 @@ information icon. This preserves both full-card navigation and tooltip hover.
     align-items: flex-end !important;
 }
 
+
+/* =========================================================
+   SETTINGS — FINAL ALIGNMENT + SINGLE SAVE ACTION
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   ERC-20 switch alignment
+   ---------------------------------------------------------
+   All other controls start at the left edge of the right-hand control
+   column. Put the switch at that exact same horizontal starting point.
+*/
+.st-key-settings_row_erc20 [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+}
+
+.st-key-settings_row_erc20 [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child
+[data-testid="stVerticalBlock"] {
+    width: 100% !important;
+    align-items: flex-start !important;
+}
+
+.st-key-settings_row_erc20 [data-testid="stCheckbox"] {
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+/* Override earlier rules that pushed the switch to the far-right. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"] {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+/* ---------------------------------------------------------
+   Single centered Save Changes action
+   --------------------------------------------------------- */
+.st-key-settings_save_action {
+    padding: 20px 4px 18px 4px !important;
+    margin: 0 !important;
+    border-top: 1px solid rgba(255,255,255,0.075) !important;
+}
+
+.st-key-settings_save_action [data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.st-key-settings_save_action [data-testid="stFormSubmitButton"] {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+
+.st-key-settings_save_action [data-testid="stFormSubmitButton"] button {
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+
+    margin: 0 auto !important;
+    padding: 0 22px !important;
+
+    border-radius: 10px !important;
+    border: 1px solid rgba(255,190,85,0.48) !important;
+
+    color: #FFF7E8 !important;
+    background:
+        linear-gradient(
+            90deg,
+            #A86800 0%,
+            #D48612 58%,
+            #F0A72A 100%
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,230,170,0.10),
+        0 0 14px rgba(255,178,30,0.13),
+        0 7px 18px rgba(0,0,0,0.30) !important;
+
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+}
+
+.st-key-settings_save_action [data-testid="stFormSubmitButton"] button:hover {
+    transform: translateY(-1px) !important;
+    border-color: rgba(255,211,106,0.72) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,240,202,0.13),
+        0 0 18px rgba(255,178,30,0.20),
+        0 9px 22px rgba(0,0,0,0.36) !important;
+}
+
+/* Old action-row styles are obsolete in this version. */
+.st-key-settings_row_save,
+.st-key-settings_row_manual_index,
+.settings-actions-divider {
+    display: none !important;
+}
+
+@media (max-width: 900px) {
+    .st-key-settings_save_action [data-testid="stFormSubmitButton"] button {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 320px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -11420,8 +11532,8 @@ def fuse_sentiment(df, news_df, fear_greed):
 def render_monitoring_controls_page(prefs):
     """Render the NOVARIS Settings page."""
     settings_tooltip = metric_tooltip_html(
-        "Changes are applied only after you select Save Preferences. "
-        "Network-related changes will be used on the next monitoring refresh."
+        "Changes are applied only after you select Save Changes. "
+        "Saving also runs an immediate latest-block index using the updated settings."
     )
 
     # Match the exact page-header treatment used by Latest Blockchain News.
@@ -11583,24 +11695,12 @@ def render_monitoring_controls_page(prefs):
                         label_visibility="collapsed",
                     )
 
-            with st.container(key="settings_row_save"):
-                label_col, control_col = st.columns([1.15, 1.85], gap="large")
-                with label_col:
-                    st.markdown(
-                        """
-                        <div class="settings-row-copy">
-                            <div class="settings-row-title">Save Preferences</div>
-                            <div class="settings-row-description">
-                                Apply the settings above to the current NOVARIS monitoring configuration.
-                            </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-                with control_col:
+            with st.container(key="settings_save_action"):
+                save_left, save_center, save_right = st.columns([1.25, 0.80, 1.25], gap="small")
+                with save_center:
                     prefs_saved = st.form_submit_button(
-                        "Save Preferences",
-                        use_container_width=False,
+                        "Save Changes",
+                        use_container_width=True,
                     )
 
         if prefs_saved:
@@ -11614,54 +11714,21 @@ def render_monitoring_controls_page(prefs):
                 "btc_txs_per_block": int(btc_txs_per_block_input),
             }
 
+            # Save the updated preferences first.
             st.session_state.monitoring_prefs = new_prefs
 
-            fetch_keys = {
-                "auto_erc20",
-                "eth_blocks",
-                "btc_blocks",
-                "btc_txs_per_block",
-            }
+            # The display cache should be rebuilt after the new index pass.
+            st.session_state.db_cache_loaded = False
 
-            if any(old_prefs.get(k) != new_prefs.get(k) for k in fetch_keys):
-                # Rebuild the lightweight DB-backed display window on the next
-                # rerun. These saved block-window settings are also used by the
-                # automatic latest-block index pass.
-                st.session_state.db_cache_loaded = False
-
+            # Refresh market-news data if the query was changed.
             if old_prefs.get("news_query") != new_prefs.get("news_query"):
                 st.session_state.force_news_refresh = True
 
-            st.success(
-                "Settings saved. The new blockchain settings will be used by the "
-                "automatic latest-block index pass. Select Index Latest Blocks Now "
-                "if you want an immediate refresh."
-            )
-
-        with st.container(key="settings_row_manual_index"):
-            label_col, control_col = st.columns([1.15, 1.85], gap="large")
-            with label_col:
-                st.markdown(
-                    """
-                    <div class="settings-row-copy">
-                        <div class="settings-row-title">Latest Block Index</div>
-                        <div class="settings-row-description">
-                            Run an immediate blockchain refresh using the preferences above.
-                        </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-            with control_col:
-                if st.button(
-                    "Index Latest Blocks Now",
-                    key="manual_index_latest_blocks",
-                    icon=":material/sync:",
-                    use_container_width=False,
-                ):
-                    st.session_state.force_network_refresh = True
-                    st.session_state.nav_view = "home"
-                    st.rerun()
+            # One action now does both jobs:
+            # Save Changes -> immediately run the latest blockchain index.
+            st.session_state.force_network_refresh = True
+            st.session_state.nav_view = "home"
+            st.rerun()
 
 
 # =========================================================
@@ -12106,7 +12173,7 @@ market_overview_df = st.session_state.market_overview_data
 # ---------------------------------------------------------
 # NOVARIS performs a bounded latest-block index pass:
 #   1. once when a new browser session opens on Home;
-#   2. immediately when Settings -> Index Latest Blocks Now is selected; or
+#   2. immediately after Settings -> Save Changes is selected; or
 #   3. when Home is revisited after AUTO_INDEX_REFRESH_SECONDS.
 #
 # There is still NO background ingestion. If Streamlit sleeps, nothing runs.
