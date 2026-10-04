@@ -7588,6 +7588,7 @@ information icon. This preserves both full-card navigation and tooltip hover.
 .st-key-settings_row_eth_blocks,
 .st-key-settings_row_btc_blocks,
 .st-key-settings_row_btc_txs,
+.st-key-settings_row_save,
 .st-key-settings_row_manual_index {
     position: relative !important;
     padding: 17px 4px !important;
@@ -7609,6 +7610,7 @@ information icon. This preserves both full-card navigation and tooltip hover.
 .st-key-settings_row_eth_blocks [data-testid="stHorizontalBlock"],
 .st-key-settings_row_btc_blocks [data-testid="stHorizontalBlock"],
 .st-key-settings_row_btc_txs [data-testid="stHorizontalBlock"],
+.st-key-settings_row_save [data-testid="stHorizontalBlock"],
 .st-key-settings_row_manual_index [data-testid="stHorizontalBlock"] {
     align-items: center !important;
 }
@@ -7724,8 +7726,181 @@ information icon. This preserves both full-card navigation and tooltip hover.
     .st-key-settings_row_eth_blocks [data-testid="stHorizontalBlock"],
     .st-key-settings_row_btc_blocks [data-testid="stHorizontalBlock"],
     .st-key-settings_row_btc_txs [data-testid="stHorizontalBlock"],
+    .st-key-settings_row_save [data-testid="stHorizontalBlock"],
     .st-key-settings_row_manual_index [data-testid="stHorizontalBlock"] {
         gap: 10px !important;
+    }
+}
+
+
+/* =========================================================
+   SETTINGS — FINAL CONTROL POLISH
+   ========================================================= */
+
+/* Save and manual index are normal settings rows too. */
+.st-key-settings_row_save {
+    position: relative !important;
+    padding: 17px 4px !important;
+    margin: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.075) !important;
+}
+
+.st-key-settings_row_save [data-testid="stHorizontalBlock"],
+.st-key-settings_row_manual_index [data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+}
+
+/* ---------------------------------------------------------
+   ERC-20 toggle: make the switch clearly visible.
+   Streamlit/BaseWeb markup varies slightly by version, so
+   cover the common toggle/checkbox wrappers.
+   --------------------------------------------------------- */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"],
+.st-key-settings_row_erc20 [data-testid="stToggle"] {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+}
+
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"] {
+    margin-left: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+/* Switch track — off state. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"] > div:first-child,
+.st-key-settings_row_erc20 [data-testid="stCheckbox"] label > div:first-child,
+.st-key-settings_row_erc20 [data-testid="stToggle"] label > div:first-child {
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,178,30,0.38) !important;
+
+    background:
+        linear-gradient(180deg, rgba(36,36,36,0.98), rgba(17,17,17,1)) !important;
+
+    box-shadow:
+        inset 0 1px 3px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 0 0 1px rgba(255,178,30,0.025),
+        0 0 10px rgba(255,178,30,0.07) !important;
+}
+
+/* Off-state knob. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"] > div:first-child > div,
+.st-key-settings_row_erc20 [data-testid="stCheckbox"] label > div:first-child > div,
+.st-key-settings_row_erc20 [data-testid="stToggle"] label > div:first-child > div {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+
+    border-radius: 999px !important;
+    background: #F3EFE7 !important;
+    border: 1px solid rgba(255,255,255,0.70) !important;
+
+    box-shadow:
+        0 2px 5px rgba(0,0,0,0.42),
+        0 0 6px rgba(255,255,255,0.08) !important;
+}
+
+/* Checked / enabled state. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"]:has(input:checked) > div:first-child,
+.st-key-settings_row_erc20 [data-testid="stCheckbox"] label:has(input:checked) > div:first-child,
+.st-key-settings_row_erc20 [data-testid="stToggle"] label:has(input:checked) > div:first-child {
+    border-color: rgba(255,199,92,0.72) !important;
+    background:
+        linear-gradient(180deg, rgba(176,111,10,0.98), rgba(104,63,4,1)) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,227,165,0.13),
+        0 0 12px rgba(255,178,30,0.18) !important;
+}
+
+/* Extra fallback for browsers/Streamlit versions exposing role=switch. */
+.st-key-settings_row_erc20 input[role="switch"] {
+    accent-color: #D58B17 !important;
+}
+
+/* ---------------------------------------------------------
+   Action buttons: same footprint, right aligned.
+   --------------------------------------------------------- */
+.st-key-settings_row_save [data-testid="stFormSubmitButton"],
+.st-key-settings_row_manual_index .stButton {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+
+.st-key-settings_row_save [data-testid="stFormSubmitButton"] button,
+.st-key-settings_row_manual_index .stButton > button {
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+    min-height: 42px !important;
+    height: 42px !important;
+
+    margin: 0 !important;
+    border-radius: 10px !important;
+}
+
+/* Save is intentionally restrained; manual index remains the brighter action. */
+.st-key-settings_row_save [data-testid="stFormSubmitButton"] button {
+    background:
+        linear-gradient(180deg, rgba(57,39,12,0.98), rgba(28,20,8,1)) !important;
+    border-color: rgba(255,178,30,0.42) !important;
+    color: #F8E6BC !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,226,160,0.06),
+        0 0 10px rgba(255,178,30,0.08) !important;
+}
+
+.st-key-settings_row_save [data-testid="stFormSubmitButton"] button:hover {
+    border-color: rgba(255,199,92,0.66) !important;
+    background:
+        linear-gradient(180deg, rgba(75,49,12,0.99), rgba(34,22,7,1)) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255,226,160,0.08),
+        0 0 14px rgba(255,178,30,0.14) !important;
+}
+
+/* The final index action uses the same compact width as Save. */
+.st-key-settings_row_manual_index .stButton {
+    max-width: none !important;
+}
+
+.st-key-settings_row_manual_index .stButton > button {
+    background:
+        linear-gradient(90deg, #A86800, #D48612 58%, #F0A72A) !important;
+    color: #FFF7E8 !important;
+}
+
+/* Remove the old action divider if still present anywhere. */
+.settings-actions-divider {
+    display: none !important;
+}
+
+/* Keep the last row visually balanced. */
+.st-key-settings_row_manual_index {
+    padding-top: 17px !important;
+    padding-bottom: 17px !important;
+}
+
+/* Responsive action width. */
+@media (max-width: 900px) {
+    .st-key-settings_row_save [data-testid="stFormSubmitButton"] button,
+    .st-key-settings_row_manual_index .stButton > button {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
     }
 }
 
@@ -11074,14 +11249,25 @@ def render_monitoring_controls_page(prefs):
                         label_visibility="collapsed",
                     )
 
-            st.markdown('<div class="settings-actions-divider"></div>', unsafe_allow_html=True)
-
-            save_space, save_col = st.columns([2.35, 1.0], gap="large")
-            with save_col:
-                prefs_saved = st.form_submit_button(
-                    "Save Preferences",
-                    use_container_width=True,
-                )
+            with st.container(key="settings_row_save"):
+                label_col, control_col = st.columns([1.15, 1.85], gap="large")
+                with label_col:
+                    st.markdown(
+                        """
+                        <div class="settings-row-copy">
+                            <div class="settings-row-title">Save Preferences</div>
+                            <div class="settings-row-description">
+                                Apply the settings above to the current NOVARIS monitoring configuration.
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with control_col:
+                    prefs_saved = st.form_submit_button(
+                        "Save Preferences",
+                        use_container_width=False,
+                    )
 
         if prefs_saved:
             old_prefs = dict(st.session_state.monitoring_prefs)
@@ -11137,7 +11323,7 @@ def render_monitoring_controls_page(prefs):
                     "Index Latest Blocks Now",
                     key="manual_index_latest_blocks",
                     icon=":material/sync:",
-                    use_container_width=True,
+                    use_container_width=False,
                 ):
                     st.session_state.force_network_refresh = True
                     st.session_state.nav_view = "home"
