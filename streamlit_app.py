@@ -5020,10 +5020,23 @@ Target the button's own key directly instead of relying on
    HEADER STATUS + SETTINGS ICON
    ========================================================= */
 
-/* Shift Live Feed slightly left to create space for the gear icon. */
+/* Align the complete Live Feed session indicator with the Settings icon. */
 .brand-live-status {
-    top: 0.83rem !important;
+    top: 0.43rem !important;
     right: 4.55rem !important;
+
+    height: 44px !important;
+    min-height: 44px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 7px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    line-height: 1 !important;
 }
 
 /* Streamlit keyed Settings button placed beside Live Feed. */
@@ -7522,6 +7535,25 @@ information icon. This preserves both full-card navigation and tooltip hover.
     opacity: 1 !important;
     transform: translate(1px, -1.5px) !important;
     filter: drop-shadow(0 0 4px rgba(255,178,30,0.20)) !important;
+}
+
+
+/* Header status optical alignment. */
+.brand-live-status .brand-live-dot {
+    flex: 0 0 8px !important;
+    margin: 0 !important;
+    transform: translateY(0) !important;
+}
+
+.brand-live-status span {
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 1 !important;
+}
+
+/* Prevent any browser/Streamlit hover helper from appearing on the gear control. */
+.st-key-header_settings_button [data-testid="stTooltipIcon"] {
+    display: none !important;
 }
 
 </style>
@@ -11042,7 +11074,6 @@ with main_col:
             "Settings",
             key="header_settings_button",
             icon=":material/settings:",
-            help="Open Settings",
             type="primary" if current_view == "controls" else "secondary",
             on_click=set_nav_view,
             args=("controls",),
