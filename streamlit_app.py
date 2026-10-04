@@ -1448,6 +1448,68 @@ hr {
     text-transform: lowercase;
 }
 
+.fg-source-link,
+.fg-source-link:visited,
+.fg-source-link:active {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+
+    color: #F4F1EB !important;
+    text-decoration: none !important;
+
+    border-bottom: 1px solid transparent;
+    transition:
+        color 0.18s ease,
+        border-color 0.18s ease,
+        text-shadow 0.18s ease !important;
+}
+
+.fg-source-link:hover,
+.fg-source-link:focus-visible {
+    color: #FFD978 !important;
+    border-bottom-color: rgba(255,178,30,0.46) !important;
+    text-shadow: 0 0 8px rgba(255,178,30,0.18) !important;
+    outline: none !important;
+}
+
+.fg-external-link-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 15px !important;
+    height: 15px !important;
+    flex: 0 0 15px !important;
+
+    color: #C9C3B8 !important;
+    transform: translateY(-0.5px);
+    transition:
+        color 0.18s ease,
+        transform 0.18s ease,
+        filter 0.18s ease !important;
+}
+
+.fg-external-link-icon svg {
+    width: 15px !important;
+    height: 15px !important;
+    display: block !important;
+    overflow: visible !important;
+
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.9 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+}
+
+.fg-source-link:hover .fg-external-link-icon,
+.fg-source-link:focus-visible .fg-external-link-icon {
+    color: #FFD978 !important;
+    transform: translate(1px, -1.5px) !important;
+    filter: drop-shadow(0 0 4px rgba(255,178,30,0.22)) !important;
+}
+
 /* Full-width card refinements */
 .st-key-fear_greed_index_card {
     min-height: 268px !important;
@@ -8947,7 +9009,19 @@ def render_fear_greed_index_card(fg):
                 f'</div>'
                 f'<div class="fg-source-row">'
                 f'<span class="fg-source-label">DATA SOURCE</span>'
-                f'<span class="fg-source-value">alternative.me</span>'
+                f'<a class="fg-source-value fg-source-link" '
+                f'href="https://alternative.me/crypto/fear-and-greed-index/" '
+                f'target="_blank" rel="noopener noreferrer" '
+                f'aria-label="Open alternative.me Fear and Greed Index source">'
+                f'<span>alternative.me</span>'
+                f'<span class="fg-external-link-icon" aria-hidden="true">'
+                f'<svg viewBox="0 0 24 24">'
+                f'<path d="M14 5h5v5"></path>'
+                f'<path d="M10 14L19 5"></path>'
+                f'<path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"></path>'
+                f'</svg>'
+                f'</span>'
+                f'</a>'
                 f'</div>'
                 f'</div>'
                 f'</div>'
