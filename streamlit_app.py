@@ -7904,6 +7904,158 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   SETTINGS — SAMPLE-STYLE ERC-20 TOGGLE
+   ========================================================= */
+
+/*
+   Draw our own clean switch on top of Streamlit's toggle so it
+   matches the supplied reference:
+   OFF = dark charcoal track + white knob on the left
+   ON  = muted green track + white knob on the right
+*/
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"] {
+    position: relative !important;
+
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+
+    height: 26px !important;
+    min-height: 26px !important;
+    max-height: 26px !important;
+
+    margin: 0 0 0 auto !important;
+    padding: 0 !important;
+
+    display: block !important;
+    cursor: pointer !important;
+
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Hide Streamlit's own visible switch artwork, while keeping the input active. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"] > div,
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"] > span {
+    opacity: 0 !important;
+}
+
+/* Make the real checkbox input cover the custom switch for reliable clicking. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"] input[type="checkbox"] {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 46px !important;
+    height: 26px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    opacity: 0 !important;
+    cursor: pointer !important;
+    z-index: 5 !important;
+}
+
+/* Track — OFF state. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"]::before {
+    content: "" !important;
+
+    position: absolute !important;
+    inset: 2px !important;
+
+    border-radius: 999px !important;
+
+    background: #292A2C !important;
+    border: 1px solid rgba(255,255,255,0.055) !important;
+
+    box-shadow:
+        inset 0 1px 2px rgba(0,0,0,0.48),
+        inset 0 1px 0 rgba(255,255,255,0.035),
+        0 1px 3px rgba(0,0,0,0.28) !important;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease !important;
+
+    pointer-events: none !important;
+}
+
+/* Knob — OFF state. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"]::after {
+    content: "" !important;
+
+    position: absolute !important;
+    top: 6px !important;
+    left: 6px !important;
+
+    width: 14px !important;
+    height: 14px !important;
+
+    border-radius: 50% !important;
+
+    background: #F5F5F3 !important;
+    border: 1px solid rgba(255,255,255,0.72) !important;
+
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.40),
+        0 0 2px rgba(255,255,255,0.16) !important;
+
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease !important;
+
+    pointer-events: none !important;
+}
+
+/* Track — ON state, matching the muted green in the reference image. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"]:has(input:checked)::before {
+    background: #4EA36B !important;
+    border-color: rgba(112,205,141,0.28) !important;
+
+    box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.10),
+        inset 0 -1px 1px rgba(0,0,0,0.18),
+        0 1px 4px rgba(50,140,85,0.18) !important;
+}
+
+/* Knob — ON state. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"]:has(input:checked)::after {
+    transform: translateX(20px) !important;
+    background: #FFFFFF !important;
+}
+
+/* Very subtle interaction feedback. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"]:hover::before {
+    border-color: rgba(255,255,255,0.10) !important;
+}
+
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"]:has(input:checked):hover::before {
+    background: #56AD73 !important;
+    border-color: rgba(132,220,158,0.32) !important;
+}
+
+/* Keyboard focus without a bright browser outline. */
+.st-key-settings_row_erc20 label[data-baseweb="checkbox"]:has(input:focus-visible)::before {
+    box-shadow:
+        0 0 0 2px rgba(255,178,30,0.24),
+        inset 0 1px 2px rgba(0,0,0,0.42) !important;
+}
+
+/* Keep the switch aligned to the right-hand control column. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"],
+.st-key-settings_row_erc20 [data-testid="stToggle"] {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
