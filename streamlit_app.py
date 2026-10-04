@@ -7435,6 +7435,95 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   CRYPTO MARKET — CLICKABLE COINGECKO ASSET ROWS
+   ========================================================= */
+
+.market-row-link,
+.market-row-link:visited,
+.market-row-link:hover,
+.market-row-link:active {
+    display: block !important;
+    width: 100% !important;
+    color: inherit !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+}
+
+.market-row-link .market-table-row {
+    cursor: pointer !important;
+}
+
+/* Keep the original clean row treatment, but make interaction clearer. */
+.market-row-link:hover .market-table-row,
+.market-row-link:focus-visible .market-table-row {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.060),
+            rgba(255,255,255,0.016) 44%,
+            transparent
+        ) !important;
+
+    box-shadow:
+        inset 3px 0 0 rgba(255,178,30,0.82),
+        inset 0 1px 0 rgba(255,255,255,0.018) !important;
+}
+
+.market-row-link:focus-visible {
+    outline: 1px solid rgba(255,199,92,0.48) !important;
+    outline-offset: -1px !important;
+}
+
+/* Asset title + discreet external-link indicator. */
+.market-asset-name {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+}
+
+.market-row-external-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 14px !important;
+    height: 14px !important;
+    flex: 0 0 14px !important;
+
+    color: #8F887D !important;
+    opacity: 0.82 !important;
+
+    transform: translateY(-0.5px);
+    transition:
+        color 0.18s ease,
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        filter 0.18s ease !important;
+}
+
+.market-row-external-icon svg {
+    width: 14px !important;
+    height: 14px !important;
+    display: block !important;
+    overflow: visible !important;
+
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.9 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+}
+
+.market-row-link:hover .market-row-external-icon,
+.market-row-link:focus-visible .market-row-external-icon {
+    color: #FFD978 !important;
+    opacity: 1 !important;
+    transform: translate(1px, -1.5px) !important;
+    filter: drop-shadow(0 0 4px rgba(255,178,30,0.20)) !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -9682,11 +9771,13 @@ def render_market_page(prices, market_df: pd.DataFrame):
             "symbol": "BTC",
             "name": "Bitcoin",
             "icon": "<span class='market-btc-icon'>₿</span>",
+            "source_url": "https://www.coingecko.com/en/coins/bitcoin",
         },
         {
             "symbol": "ETH",
             "name": "Ethereum",
             "icon": get_alert_asset_icon("ETH", CHAIN_ETH),
+            "source_url": "https://www.coingecko.com/en/coins/ethereum",
         },
     ]
 
@@ -9754,13 +9845,31 @@ def render_market_page(prices, market_df: pd.DataFrame):
 
         spark_svg = _market_sparkline_svg(sparkline, symbol)
 
+        source_url = html.escape(str(asset["source_url"]), quote=True)
+
         market_html.extend(
             [
+                (
+                    f'<a class="market-row-link" href="{source_url}" '
+                    f'target="_blank" rel="noopener noreferrer" '
+                    f'aria-label="Open {html.escape(asset["name"])} data source on CoinGecko">'
+                ),
                 '<div class="market-table-row">',
                 '<div class="market-asset-cell">',
                 f'<div class="market-asset-icon">{asset["icon"]}</div>',
                 '<div class="market-asset-copy">',
-                f'<div class="market-asset-name">{html.escape(asset["name"])}</div>',
+                (
+                    f'<div class="market-asset-name">'
+                    f'{html.escape(asset["name"])}'
+                    f'<span class="market-row-external-icon" aria-hidden="true">'
+                    f'<svg viewBox="0 0 24 24">'
+                    f'<path d="M14 5h5v5"></path>'
+                    f'<path d="M10 14L19 5"></path>'
+                    f'<path d="M19 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"></path>'
+                    f'</svg>'
+                    f'</span>'
+                    f'</div>'
+                ),
                 f'<div class="market-asset-symbol">{symbol}</div>',
                 '</div>',
                 '</div>',
@@ -9772,6 +9881,7 @@ def render_market_page(prices, market_df: pd.DataFrame):
                     f'</div>'
                 ),
                 '</div>',
+                '</a>',
             ]
         )
 
