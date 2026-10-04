@@ -8056,6 +8056,188 @@ information icon. This preserves both full-card navigation and tooltip hover.
     padding: 0 !important;
 }
 
+
+/* =========================================================
+   ERC-20 SWITCH — FINAL SAMPLE-MATCHED IMPLEMENTATION
+   ========================================================= */
+
+/*
+   Streamlit's native toggle structure can change between versions.
+   Use a normal checkbox for state, hide its native artwork, and draw
+   the switch on the stable stCheckbox wrapper instead.
+
+   OFF: charcoal track + white knob on left
+   ON : muted green track + white knob on right
+*/
+
+/* Push the switch to the far-right of the control column. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"] {
+    position: relative !important;
+
+    display: block !important;
+    flex: 0 0 48px !important;
+
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
+
+    margin: 0 0 0 auto !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+    cursor: pointer !important;
+
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* The real Streamlit label/input remains the click target,
+   but its native square checkbox is completely invisible. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"] > label,
+.st-key-settings_row_erc20 [data-testid="stCheckbox"] label {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 20 !important;
+
+    width: 48px !important;
+    height: 28px !important;
+    min-width: 48px !important;
+    min-height: 28px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    opacity: 0 !important;
+    cursor: pointer !important;
+}
+
+/* Ensure the real input fills the custom control for easy clicking. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"] input[type="checkbox"] {
+    position: absolute !important;
+    inset: 0 !important;
+
+    width: 48px !important;
+    height: 28px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    opacity: 0 !important;
+    cursor: pointer !important;
+}
+
+/* Custom track — OFF. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"]::before {
+    content: "" !important;
+
+    position: absolute !important;
+    z-index: 2 !important;
+
+    left: 1px !important;
+    top: 3px !important;
+
+    width: 46px !important;
+    height: 22px !important;
+
+    border-radius: 999px !important;
+
+    background: #2A2B2D !important;
+    border: 1px solid rgba(255,255,255,0.055) !important;
+
+    box-shadow:
+        inset 0 1px 2px rgba(0,0,0,0.52),
+        inset 0 1px 0 rgba(255,255,255,0.035),
+        0 1px 3px rgba(0,0,0,0.28) !important;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease !important;
+
+    pointer-events: none !important;
+}
+
+/* Custom knob — OFF, left side. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"]::after {
+    content: "" !important;
+
+    position: absolute !important;
+    z-index: 3 !important;
+
+    left: 5px !important;
+    top: 7px !important;
+
+    width: 14px !important;
+    height: 14px !important;
+
+    border-radius: 50% !important;
+
+    background: #F7F7F5 !important;
+    border: 1px solid rgba(255,255,255,0.75) !important;
+
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.42),
+        0 0 2px rgba(255,255,255,0.14) !important;
+
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease !important;
+
+    pointer-events: none !important;
+}
+
+/* ON track — muted green like the supplied reference. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"]:has(input:checked)::before {
+    background: #4C9B68 !important;
+    border-color: rgba(110,197,137,0.30) !important;
+
+    box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.09),
+        inset 0 -1px 1px rgba(0,0,0,0.16),
+        0 1px 4px rgba(49,137,83,0.17) !important;
+}
+
+/* ON knob — right side. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"]:has(input:checked)::after {
+    transform: translateX(24px) !important;
+    background: #FFFFFF !important;
+}
+
+/* Restrained hover only. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"]:hover::before {
+    border-color: rgba(255,255,255,0.10) !important;
+}
+
+.st-key-settings_row_erc20 [data-testid="stCheckbox"]:has(input:checked):hover::before {
+    background: #53A770 !important;
+    border-color: rgba(125,210,151,0.34) !important;
+}
+
+/* Keyboard focus. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"]:has(input:focus-visible)::before {
+    box-shadow:
+        0 0 0 2px rgba(255,178,30,0.20),
+        inset 0 1px 2px rgba(0,0,0,0.42) !important;
+}
+
+/* Keep the whole right control column aligned like the reference UI. */
+.st-key-settings_row_erc20 [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+.st-key-settings_row_erc20 [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child
+[data-testid="stVerticalBlock"] {
+    width: 100% !important;
+    align-items: flex-end !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -11279,7 +11461,7 @@ def render_monitoring_controls_page(prefs):
                         unsafe_allow_html=True,
                     )
                 with control_col:
-                    auto_erc20_input = st.toggle(
+                    auto_erc20_input = st.checkbox(
                         "Include ERC-20 network scan",
                         value=bool(prefs["auto_erc20"]),
                         label_visibility="collapsed",
