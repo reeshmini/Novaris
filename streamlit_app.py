@@ -7561,6 +7561,174 @@ information icon. This preserves both full-card navigation and tooltip hover.
     display: none !important;
 }
 
+
+/* =========================================================
+   SETTINGS — CLEAN HORIZONTAL ROW LAYOUT
+   ========================================================= */
+
+/* Calm the outer card down: the rows provide the visual structure. */
+.st-key-monitoring_controls_card {
+    padding: 6px 24px 10px 24px !important;
+    overflow: visible !important;
+}
+
+.st-key-monitoring_controls_card:hover {
+    transform: none !important;
+    border-color: rgba(255,178,30,0.30) !important;
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.045),
+        0 0 16px rgba(255,178,30,0.12),
+        0 12px 30px rgba(0,0,0,0.40) !important;
+}
+
+/* Every preference is one horizontal row, like a premium app settings panel. */
+.st-key-settings_row_erc20,
+.st-key-settings_row_news,
+.st-key-settings_row_whale,
+.st-key-settings_row_eth_blocks,
+.st-key-settings_row_btc_blocks,
+.st-key-settings_row_btc_txs,
+.st-key-settings_row_manual_index {
+    position: relative !important;
+    padding: 17px 4px !important;
+    margin: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.075) !important;
+}
+
+/* Last action row has no bottom rule. */
+.st-key-settings_row_manual_index {
+    border-bottom: none !important;
+    padding-top: 18px !important;
+    padding-bottom: 12px !important;
+}
+
+/* Vertically centre labels and controls within each row. */
+.st-key-settings_row_erc20 [data-testid="stHorizontalBlock"],
+.st-key-settings_row_news [data-testid="stHorizontalBlock"],
+.st-key-settings_row_whale [data-testid="stHorizontalBlock"],
+.st-key-settings_row_eth_blocks [data-testid="stHorizontalBlock"],
+.st-key-settings_row_btc_blocks [data-testid="stHorizontalBlock"],
+.st-key-settings_row_btc_txs [data-testid="stHorizontalBlock"],
+.st-key-settings_row_manual_index [data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+}
+
+/* Left side: title + muted supporting copy. */
+.settings-row-copy {
+    padding-right: 22px !important;
+}
+
+.settings-row-title {
+    color: #F4F1EA !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.94rem !important;
+    font-weight: 760 !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.01em !important;
+}
+
+.settings-row-description {
+    margin-top: 5px !important;
+    max-width: 440px !important;
+
+    color: #8E887F !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.76rem !important;
+    font-weight: 520 !important;
+    line-height: 1.42 !important;
+}
+
+/* Right-side controls stay aligned and do not sprawl edge-to-edge. */
+.st-key-settings_row_news .stTextInput,
+.st-key-settings_row_whale .stNumberInput {
+    width: 100% !important;
+    max-width: 610px !important;
+    margin-left: auto !important;
+}
+
+.st-key-settings_row_eth_blocks .stSlider,
+.st-key-settings_row_btc_blocks .stSlider,
+.st-key-settings_row_btc_txs .stSlider {
+    width: 100% !important;
+    max-width: 610px !important;
+    margin-left: auto !important;
+}
+
+/* Toggle sits neatly on the right, like the supplied reference. */
+.st-key-settings_row_erc20 [data-testid="stCheckbox"],
+.st-key-settings_row_erc20 [data-testid="stToggle"] {
+    width: max-content !important;
+    margin-left: auto !important;
+}
+
+/* Cleaner dark input shells. */
+.st-key-monitoring_controls_card .stTextInput input,
+.st-key-monitoring_controls_card .stNumberInput input {
+    min-height: 42px !important;
+    border-radius: 10px !important;
+    background: rgba(18,18,18,0.98) !important;
+    border-color: rgba(255,255,255,0.16) !important;
+}
+
+/* Slider tracks retain NOVARIS amber but are visually lighter. */
+.st-key-settings_row_eth_blocks [data-baseweb="slider"],
+.st-key-settings_row_btc_blocks [data-baseweb="slider"],
+.st-key-settings_row_btc_txs [data-baseweb="slider"] {
+    margin-top: 2px !important;
+    margin-bottom: 0 !important;
+}
+
+/* Separation before Save Preferences without creating another "section". */
+.settings-actions-divider {
+    height: 1px !important;
+    margin: 3px 0 15px 0 !important;
+    background: rgba(255,178,30,0.11) !important;
+}
+
+/* Save is a restrained action aligned to the right. */
+.st-key-monitoring_controls_card [data-testid="stFormSubmitButton"] button {
+    min-height: 42px !important;
+}
+
+/* Manual refresh is now a right-side action, not a huge full-width bar. */
+.st-key-settings_row_manual_index .stButton {
+    width: 100% !important;
+    max-width: 610px !important;
+    margin-left: auto !important;
+}
+
+.st-key-settings_row_manual_index .stButton > button {
+    min-height: 42px !important;
+    width: 100% !important;
+    border-radius: 10px !important;
+}
+
+/* Mobile: stack each row naturally. */
+@media (max-width: 900px) {
+    .st-key-monitoring_controls_card {
+        padding: 4px 16px 8px 16px !important;
+    }
+
+    .settings-row-copy {
+        padding-right: 0 !important;
+        margin-bottom: 8px !important;
+    }
+
+    .settings-row-description {
+        max-width: none !important;
+    }
+
+    .st-key-settings_row_erc20 [data-testid="stHorizontalBlock"],
+    .st-key-settings_row_news [data-testid="stHorizontalBlock"],
+    .st-key-settings_row_whale [data-testid="stHorizontalBlock"],
+    .st-key-settings_row_eth_blocks [data-testid="stHorizontalBlock"],
+    .st-key-settings_row_btc_blocks [data-testid="stHorizontalBlock"],
+    .st-key-settings_row_btc_txs [data-testid="stHorizontalBlock"],
+    .st-key-settings_row_manual_index [data-testid="stHorizontalBlock"] {
+        gap: 10px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -10768,48 +10936,147 @@ def render_monitoring_controls_page(prefs):
 
     with st.container(border=True, key="monitoring_controls_card"):
         with st.form("monitoring_preferences_form", clear_on_submit=False):
-            left_controls, right_controls = st.columns(2, gap="large")
 
-            with left_controls:
-                auto_erc20_input = st.checkbox(
-                    "Include ERC-20 network scan",
-                    value=bool(prefs["auto_erc20"]),
-                )
-                news_query_input = st.text_input(
-                    "News Query",
-                    value=str(prefs["news_query"]),
-                )
-                whale_threshold_input = st.number_input(
-                    "Whale Threshold (USD)",
-                    min_value=1000.0,
-                    value=float(prefs["whale_threshold"]),
-                    step=100000.0,
-                )
+            with st.container(key="settings_row_erc20"):
+                label_col, control_col = st.columns([1.15, 1.85], gap="large")
+                with label_col:
+                    st.markdown(
+                        """
+                        <div class="settings-row-copy">
+                            <div class="settings-row-title">ERC-20 Network Scan</div>
+                            <div class="settings-row-description">
+                                Include ERC-20 token transfers when indexing Ethereum activity.
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with control_col:
+                    auto_erc20_input = st.toggle(
+                        "Include ERC-20 network scan",
+                        value=bool(prefs["auto_erc20"]),
+                        label_visibility="collapsed",
+                    )
 
-            with right_controls:
-                eth_blocks_input = st.slider(
-                    "Number of Ethereum Network Blocks",
-                    1,
-                    3,
-                    int(prefs["eth_blocks"]),
-                    1,
-                )
-                btc_blocks_input = st.slider(
-                    "Number of Bitcoin Network Blocks",
-                    1,
-                    10,
-                    int(prefs["btc_blocks"]),
-                    1,
-                )
-                btc_txs_per_block_input = st.slider(
-                    "Number of Bitcoin Transactions Per Block",
-                    10,
-                    50,
-                    int(prefs["btc_txs_per_block"]),
-                    5,
-                )
+            with st.container(key="settings_row_news"):
+                label_col, control_col = st.columns([1.15, 1.85], gap="large")
+                with label_col:
+                    st.markdown(
+                        """
+                        <div class="settings-row-copy">
+                            <div class="settings-row-title">News Query</div>
+                            <div class="settings-row-description">
+                                Keywords used to retrieve cryptocurrency and blockchain market news.
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with control_col:
+                    news_query_input = st.text_input(
+                        "News Query",
+                        value=str(prefs["news_query"]),
+                        label_visibility="collapsed",
+                    )
 
-            save_space, save_col = st.columns([3.4, 1.0], gap="large")
+            with st.container(key="settings_row_whale"):
+                label_col, control_col = st.columns([1.15, 1.85], gap="large")
+                with label_col:
+                    st.markdown(
+                        """
+                        <div class="settings-row-copy">
+                            <div class="settings-row-title">Whale Threshold</div>
+                            <div class="settings-row-description">
+                                Minimum USD transaction value required to classify a transfer as a whale alert.
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with control_col:
+                    whale_threshold_input = st.number_input(
+                        "Whale Threshold (USD)",
+                        min_value=1000.0,
+                        value=float(prefs["whale_threshold"]),
+                        step=100000.0,
+                        label_visibility="collapsed",
+                    )
+
+            with st.container(key="settings_row_eth_blocks"):
+                label_col, control_col = st.columns([1.15, 1.85], gap="large")
+                with label_col:
+                    st.markdown(
+                        """
+                        <div class="settings-row-copy">
+                            <div class="settings-row-title">Ethereum Network Blocks</div>
+                            <div class="settings-row-description">
+                                Number of latest Ethereum blocks indexed during each monitoring refresh.
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with control_col:
+                    eth_blocks_input = st.slider(
+                        "Number of Ethereum Network Blocks",
+                        1,
+                        3,
+                        int(prefs["eth_blocks"]),
+                        1,
+                        label_visibility="collapsed",
+                    )
+
+            with st.container(key="settings_row_btc_blocks"):
+                label_col, control_col = st.columns([1.15, 1.85], gap="large")
+                with label_col:
+                    st.markdown(
+                        """
+                        <div class="settings-row-copy">
+                            <div class="settings-row-title">Bitcoin Network Blocks</div>
+                            <div class="settings-row-description">
+                                Number of latest Bitcoin blocks indexed during each monitoring refresh.
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with control_col:
+                    btc_blocks_input = st.slider(
+                        "Number of Bitcoin Network Blocks",
+                        1,
+                        10,
+                        int(prefs["btc_blocks"]),
+                        1,
+                        label_visibility="collapsed",
+                    )
+
+            with st.container(key="settings_row_btc_txs"):
+                label_col, control_col = st.columns([1.15, 1.85], gap="large")
+                with label_col:
+                    st.markdown(
+                        """
+                        <div class="settings-row-copy">
+                            <div class="settings-row-title">Bitcoin Transactions Per Block</div>
+                            <div class="settings-row-description">
+                                Maximum number of transactions sampled from each indexed Bitcoin block.
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                with control_col:
+                    btc_txs_per_block_input = st.slider(
+                        "Number of Bitcoin Transactions Per Block",
+                        10,
+                        50,
+                        int(prefs["btc_txs_per_block"]),
+                        5,
+                        label_visibility="collapsed",
+                    )
+
+            st.markdown('<div class="settings-actions-divider"></div>', unsafe_allow_html=True)
+
+            save_space, save_col = st.columns([2.35, 1.0], gap="large")
             with save_col:
                 prefs_saved = st.form_submit_button(
                     "Save Preferences",
@@ -10851,16 +11118,30 @@ def render_monitoring_controls_page(prefs):
                 "if you want an immediate refresh."
             )
 
-        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-        if st.button(
-            "Index Latest Blocks Now",
-            key="manual_index_latest_blocks",
-            icon=":material/sync:",
-            use_container_width=True,
-        ):
-            st.session_state.force_network_refresh = True
-            st.session_state.nav_view = "home"
-            st.rerun()
+        with st.container(key="settings_row_manual_index"):
+            label_col, control_col = st.columns([1.15, 1.85], gap="large")
+            with label_col:
+                st.markdown(
+                    """
+                    <div class="settings-row-copy">
+                        <div class="settings-row-title">Latest Block Index</div>
+                        <div class="settings-row-description">
+                            Run an immediate blockchain refresh using the preferences above.
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with control_col:
+                if st.button(
+                    "Index Latest Blocks Now",
+                    key="manual_index_latest_blocks",
+                    icon=":material/sync:",
+                    use_container_width=True,
+                ):
+                    st.session_state.force_network_refresh = True
+                    st.session_state.nav_view = "home"
+                    st.rerun()
 
 
 # =========================================================
