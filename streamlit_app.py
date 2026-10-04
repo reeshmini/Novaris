@@ -6313,30 +6313,35 @@ Latest Blockchain News.
 /* Settings card aligns directly beneath the header. */
 .st-key-monitoring_controls_card {
     margin-top: 0 !important;
-    padding: 22px 24px 24px 24px !important;
+    padding: 20px 24px 24px 24px !important;
 }
 
-/* Small internal section intro — not a competing page heading. */
-.settings-card-intro {
-    margin-bottom: 19px !important;
-    padding-bottom: 15px !important;
-    border-bottom: 1px solid rgba(255,178,30,0.12) !important;
+/* Settings title + information tooltip. */
+.settings-title-row {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    overflow: visible !important;
 }
 
-.settings-card-kicker {
-    color: #D8B76B !important;
-    font-size: 0.73rem !important;
-    font-weight: 900 !important;
-    letter-spacing: 0.13em !important;
+.settings-title-row .news-page-title {
+    margin: 0 !important;
 }
 
-.settings-card-copy {
-    margin-top: 6px !important;
-    max-width: 880px !important;
-    color: #918A80 !important;
-    font-size: 0.80rem !important;
-    font-weight: 560 !important;
-    line-height: 1.48 !important;
+.settings-title-row .metric-info-tooltip {
+    margin-top: 3px !important;
+    flex-shrink: 0 !important;
+}
+
+.settings-title-row .metric-tooltip-bubble {
+    min-width: 320px !important;
+    max-width: 430px !important;
+}
+
+/* With the Monitoring Preferences intro removed, start the form cleanly. */
+.st-key-monitoring_controls_card form,
+.st-key-monitoring_controls_card [data-testid="stForm"] {
+    margin-top: 0 !important;
 }
 
 /* =========================================================
@@ -10737,38 +10742,31 @@ def fuse_sentiment(df, news_df, fear_greed):
 
 def render_monitoring_controls_page(prefs):
     """Render the NOVARIS Settings page."""
+    settings_tooltip = metric_tooltip_html(
+        "Changes are applied only after you select Save Preferences. "
+        "Network-related changes will be used on the next monitoring refresh."
+    )
+
     # Match the exact page-header treatment used by Latest Blockchain News.
     st.markdown(
-        """
-        <div class="news-hero settings-page-hero">
-            <div>
-                <div class="news-page-title">Settings</div>
-                <div class="news-page-subtitle">
-                    Configure how NOVARIS monitors blockchain activity, identifies
-                    whale transfers and retrieves market-related news.
-                </div>
-            </div>
-        </div>
-        """,
+        (
+            '<div class="news-hero settings-page-hero">'
+            '<div>'
+            '<div class="settings-title-row">'
+            '<div class="news-page-title">Settings</div>'
+            f'{settings_tooltip}'
+            '</div>'
+            '<div class="news-page-subtitle">'
+            'Configure how NOVARIS monitors blockchain activity, identifies '
+            'whale transfers and retrieves market-related news.'
+            '</div>'
+            '</div>'
+            '</div>'
+        ),
         unsafe_allow_html=True,
     )
 
     with st.container(border=True, key="monitoring_controls_card"):
-        st.markdown(
-            """
-            <div class="settings-card-intro">
-                <div>
-                    <div class="settings-card-kicker">MONITORING PREFERENCES</div>
-                    <div class="settings-card-copy">
-                        Changes are applied only after you select Save Preferences.
-                        Network-related changes will be used on the next monitoring refresh.
-                    </div>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
         with st.form("monitoring_preferences_form", clear_on_submit=False):
             left_controls, right_controls = st.columns(2, gap="large")
 
