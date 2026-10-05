@@ -8350,6 +8350,174 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   SETTINGS — FINAL VISUAL ALIGNMENT
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   ERC-20 switch: align to the exact same control start line
+   as News Query, Whale Threshold and all sliders.
+   --------------------------------------------------------- */
+.st-key-settings_erc20_control {
+    width: 100% !important;
+    max-width: 610px !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+}
+
+.st-key-settings_erc20_control [data-testid="stVerticalBlock"],
+.st-key-settings_erc20_control [data-testid="stElementContainer"] {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Put the switch at the LEFT edge of the 610px control rail. */
+.st-key-settings_erc20_control [data-testid="stCheckbox"] {
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+/* Neutralise older rules that attempted to move the switch. */
+.st-key-settings_row_erc20 [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {
+    display: block !important;
+}
+
+.st-key-settings_row_erc20 [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child
+[data-testid="stVerticalBlock"] {
+    width: 100% !important;
+    align-items: initial !important;
+}
+
+/* ---------------------------------------------------------
+   Save Changes: one clean centered footer action.
+   --------------------------------------------------------- */
+.st-key-settings_save_action {
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 20px 4px 16px 4px !important;
+
+    border-top: 1px solid rgba(255,255,255,0.075) !important;
+    background: transparent !important;
+}
+
+/* Remove any inherited inner shell spacing. */
+.st-key-settings_save_action [data-testid="stVerticalBlockBorderWrapper"],
+.st-key-settings_save_action [data-testid="stVerticalBlock"],
+.st-key-settings_save_action [data-testid="stElementContainer"] {
+    width: 100% !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Centre the submit button against the WHOLE settings card. */
+.st-key-settings_save_action [data-testid="stFormSubmitButton"] {
+    width: 100% !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.st-key-settings_save_action [data-testid="stFormSubmitButton"] button {
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+
+    height: 42px !important;
+    min-height: 42px !important;
+
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(230,165,55,0.52) !important;
+
+    background:
+        radial-gradient(
+            circle at 50% -25%,
+            rgba(255,210,118,0.15),
+            transparent 68%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(111,73,18,0.96),
+            rgba(55,36,9,0.98)
+        ) !important;
+
+    color: #FFF5DF !important;
+
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.86rem !important;
+    font-weight: 760 !important;
+    letter-spacing: 0.01em !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,232,183,0.12),
+        0 0 0 1px rgba(255,178,30,0.025),
+        0 0 12px rgba(255,178,30,0.12),
+        0 6px 16px rgba(0,0,0,0.30) !important;
+
+    transition:
+        transform 0.16s ease,
+        border-color 0.16s ease,
+        background 0.16s ease,
+        box-shadow 0.16s ease !important;
+}
+
+.st-key-settings_save_action [data-testid="stFormSubmitButton"] button:hover,
+.st-key-settings_save_action [data-testid="stFormSubmitButton"] button:focus-visible {
+    transform: translateY(-1px) !important;
+
+    border-color: rgba(255,201,101,0.72) !important;
+
+    background:
+        radial-gradient(
+            circle at 50% -25%,
+            rgba(255,220,145,0.21),
+            transparent 68%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(132,86,18,0.98),
+            rgba(66,42,8,0.99)
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,239,203,0.15),
+        0 0 16px rgba(255,178,30,0.18),
+        0 8px 20px rgba(0,0,0,0.34) !important;
+
+    outline: none !important;
+}
+
+/* Keep the bottom area compact — no giant action box. */
+.st-key-monitoring_controls_card form > div:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Mobile: switch to natural full-width action. */
+@media (max-width: 900px) {
+    .st-key-settings_erc20_control {
+        max-width: none !important;
+        margin-left: 0 !important;
+    }
+
+    .st-key-settings_save_action [data-testid="stFormSubmitButton"] button {
+        width: min(100%, 280px) !important;
+        min-width: 0 !important;
+        max-width: 280px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -11573,11 +11741,12 @@ def render_monitoring_controls_page(prefs):
                         unsafe_allow_html=True,
                     )
                 with control_col:
-                    auto_erc20_input = st.checkbox(
-                        "Include ERC-20 network scan",
-                        value=bool(prefs["auto_erc20"]),
-                        label_visibility="collapsed",
-                    )
+                    with st.container(key="settings_erc20_control"):
+                        auto_erc20_input = st.checkbox(
+                            "Include ERC-20 network scan",
+                            value=bool(prefs["auto_erc20"]),
+                            label_visibility="collapsed",
+                        )
 
             with st.container(key="settings_row_news"):
                 label_col, control_col = st.columns([1.15, 1.85], gap="large")
@@ -11696,12 +11865,10 @@ def render_monitoring_controls_page(prefs):
                     )
 
             with st.container(key="settings_save_action"):
-                save_left, save_center, save_right = st.columns([1.25, 0.80, 1.25], gap="small")
-                with save_center:
-                    prefs_saved = st.form_submit_button(
-                        "Save Changes",
-                        use_container_width=True,
-                    )
+                prefs_saved = st.form_submit_button(
+                    "Save Changes",
+                    use_container_width=False,
+                )
 
         if prefs_saved:
             old_prefs = dict(st.session_state.monitoring_prefs)
