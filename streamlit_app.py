@@ -8906,6 +8906,352 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   WALLET LOOKUP — CLEAN COMPACT CARD
+   ========================================================= */
+
+/* Main shell: calmer, less nested, more deliberate spacing. */
+.st-key-watchlist_controls_card {
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255,178,30,0.065), transparent 28%),
+        linear-gradient(180deg, rgba(12,12,12,0.995), rgba(5,5,5,1)) !important;
+
+    border: 1px solid rgba(255,178,30,0.30) !important;
+    border-radius: 20px !important;
+
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.035),
+        0 0 16px rgba(255,178,30,0.09),
+        0 14px 34px rgba(0,0,0,0.36) !important;
+}
+
+/* Keep the card fixed; no hover jump. */
+.st-key-watchlist_controls_card:hover {
+    transform: none !important;
+}
+
+/* Clean top information bar rather than another large nested card. */
+.wallet-card-topbar {
+    min-height: 74px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 20px !important;
+
+    padding: 17px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,178,30,0.018) 46%,
+            rgba(255,255,255,0.006)
+        ) !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.065) !important;
+}
+
+.wallet-card-kicker {
+    color: #F2D792 !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.13em !important;
+}
+
+.wallet-card-support {
+    margin-top: 5px !important;
+
+    color: #8F897F !important;
+    font-size: 0.78rem !important;
+    font-weight: 560 !important;
+    line-height: 1.40 !important;
+}
+
+.wallet-security-chip {
+    flex: 0 0 auto !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+
+    padding: 6px 10px !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(95,204,126,0.22) !important;
+
+    background: rgba(72,196,125,0.055) !important;
+    color: #A8DDB7 !important;
+
+    font-size: 0.66rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.09em !important;
+}
+
+.wallet-security-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+
+    background: #57D47A !important;
+    box-shadow: 0 0 7px rgba(87,212,122,0.52) !important;
+}
+
+/* Form gets one consistent inset. */
+.st-key-watchlist_controls_card [data-testid="stForm"] {
+    padding: 19px 20px 18px 20px !important;
+}
+
+/* Wallet address panels are flatter and cleaner. */
+.st-key-wallet_eth_panel,
+.st-key-wallet_btc_panel {
+    min-height: 112px !important;
+    padding: 15px 16px 16px 16px !important;
+
+    border-radius: 14px !important;
+    border: 1px solid rgba(255,255,255,0.085) !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.025),
+            rgba(255,255,255,0.010)
+        ) !important;
+
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.018) !important;
+}
+
+.st-key-wallet_eth_panel:hover,
+.st-key-wallet_btc_panel:hover {
+    border-color: rgba(255,178,30,0.20) !important;
+}
+
+/* Smaller network header so the input is the visual focus. */
+.wallet-network-heading {
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+}
+
+.wallet-network-icon {
+    width: 32px !important;
+    height: 32px !important;
+    flex: 0 0 32px !important;
+
+    border-color: rgba(255,178,30,0.25) !important;
+    box-shadow: 0 0 10px rgba(255,178,30,0.06) !important;
+}
+
+.wallet-network-icon-eth svg {
+    width: 17px !important;
+    height: 22px !important;
+}
+
+.wallet-network-icon-btc {
+    font-size: 1.25rem !important;
+}
+
+.wallet-network-title {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+}
+
+.wallet-network-hint {
+    color: #777168 !important;
+    font-size: 0.70rem !important;
+}
+
+/* Replace the oversized bright textareas with compact dark address fields. */
+.st-key-wallet_eth_panel .stTextInput,
+.st-key-wallet_btc_panel .stTextInput {
+    width: 100% !important;
+}
+
+.st-key-wallet_eth_panel .stTextInput input,
+.st-key-wallet_btc_panel .stTextInput input {
+    min-height: 44px !important;
+    height: 44px !important;
+
+    padding: 0 13px !important;
+
+    border-radius: 10px !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+
+    background: rgba(15,15,15,0.98) !important;
+    color: #F4F1EB !important;
+
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace !important;
+    font-size: 0.79rem !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.025),
+        0 0 0 rgba(0,0,0,0) !important;
+}
+
+.st-key-wallet_eth_panel .stTextInput input:focus,
+.st-key-wallet_btc_panel .stTextInput input:focus {
+    border-color: rgba(255,190,70,0.50) !important;
+
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.08),
+        0 0 12px rgba(255,178,30,0.06) !important;
+}
+
+.st-key-wallet_eth_panel .stTextInput input::placeholder,
+.st-key-wallet_btc_panel .stTextInput input::placeholder {
+    color: #69645D !important;
+}
+
+/* Thin divider before the single control row. */
+.wallet-search-divider {
+    height: 1px !important;
+    margin: 18px 0 15px 0 !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.075) 12%,
+            rgba(255,255,255,0.075) 88%,
+            transparent
+        ) !important;
+}
+
+/* Search controls are one clean horizontal row. */
+.st-key-wallet_search_controls {
+    padding: 2px 0 0 0 !important;
+}
+
+.st-key-wallet_search_controls [data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+}
+
+.wallet-search-copy {
+    padding-right: 10px !important;
+}
+
+.wallet-search-title {
+    color: #F5F1E9 !important;
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+}
+
+.wallet-search-note {
+    margin-top: 4px !important;
+    color: #7D776F !important;
+    font-size: 0.70rem !important;
+    line-height: 1.38 !important;
+}
+
+/* Slider is visually centered in the row. */
+.st-key-wallet_search_controls .stSlider {
+    margin: 0 !important;
+    padding-top: 0 !important;
+}
+
+.st-key-wallet_search_controls [data-baseweb="slider"] {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Keep amber track but make the knob more restrained. */
+.st-key-wallet_search_controls [data-baseweb="slider"] [role="slider"] {
+    width: 14px !important;
+    height: 14px !important;
+
+    background: #FFB21E !important;
+    border-color: #FFB21E !important;
+
+    box-shadow:
+        0 0 0 3px rgba(255,178,30,0.09),
+        0 0 8px rgba(255,178,30,0.18) !important;
+}
+
+/* Search button — compact, premium and vertically aligned. */
+.st-key-wallet_search_controls [data-testid="stFormSubmitButton"] {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.st-key-wallet_search_controls [data-testid="stFormSubmitButton"] button {
+    width: 100% !important;
+    min-height: 42px !important;
+    height: 42px !important;
+
+    margin: 0 !important;
+
+    border-radius: 10px !important;
+    border: 1px solid rgba(255,178,30,0.36) !important;
+
+    background:
+        radial-gradient(circle at 50% -30%, rgba(255,205,100,0.10), transparent 68%),
+        linear-gradient(180deg, rgba(62,42,14,0.98), rgba(23,16,7,0.99)) !important;
+
+    color: #FCE9BA !important;
+
+    font-size: 0.80rem !important;
+    font-weight: 800 !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,233,184,0.07),
+        0 0 10px rgba(255,178,30,0.07),
+        0 6px 14px rgba(0,0,0,0.28) !important;
+}
+
+.st-key-wallet_search_controls [data-testid="stFormSubmitButton"] button:hover {
+    transform: translateY(-1px) !important;
+
+    border-color: rgba(255,203,103,0.60) !important;
+
+    background:
+        radial-gradient(circle at 50% -30%, rgba(255,215,130,0.15), transparent 68%),
+        linear-gradient(180deg, rgba(78,52,14,0.99), rgba(29,19,7,1)) !important;
+
+    color: #FFFFFF !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,239,205,0.10),
+        0 0 14px rgba(255,178,30,0.12),
+        0 8px 17px rgba(0,0,0,0.32) !important;
+}
+
+/* Remove older spacer behavior. */
+.wallet-action-spacer {
+    display: none !important;
+}
+
+/* The ready state below the form should feel like part of the same system. */
+.wallet-empty-state {
+    margin-top: 14px !important;
+    padding: 13px 16px !important;
+
+    border-radius: 13px !important;
+    border-color: rgba(255,178,30,0.13) !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.030),
+            rgba(255,255,255,0.008)
+        ) !important;
+}
+
+/* Responsive stacking. */
+@media (max-width: 900px) {
+    .wallet-card-topbar {
+        align-items: flex-start !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .st-key-wallet_search_controls [data-testid="stHorizontalBlock"] {
+        gap: 12px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -12541,22 +12887,17 @@ with main_col:
         with st.container(border=True, key="watchlist_controls_card"):
             st.markdown(
                 """
-                <div class="wallet-intro-strip">
-                    <div class="wallet-intro-icon">
-                        <svg viewBox="0 0 48 48" aria-hidden="true">
-                            <circle cx="20" cy="20" r="10"></circle>
-                            <path d="M27.5 27.5 38 38"></path>
-                            <circle cx="20" cy="20" r="3"></circle>
-                        </svg>
-                    </div>
-                    <div class="wallet-intro-copy">
-                        <div class="wallet-intro-title">Search blockchain activity</div>
-                        <div class="wallet-intro-note">
-                            Only public wallet addresses are queried. No wallet connection,
-                            seed phrase or private key is required.
+                <div class="wallet-card-topbar">
+                    <div>
+                        <div class="wallet-card-kicker">PUBLIC ADDRESS LOOKUP</div>
+                        <div class="wallet-card-support">
+                            Enter a Bitcoin or Ethereum public address. NOVARIS only reads public on-chain data.
                         </div>
                     </div>
-                    <div class="wallet-intro-badge">BTC + ETH</div>
+                    <div class="wallet-security-chip">
+                        <span class="wallet-security-dot"></span>
+                        READ-ONLY
+                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -12578,16 +12919,15 @@ with main_col:
                                 </div>
                                 <div>
                                     <div class="wallet-network-title">Ethereum Wallet</div>
-                                    <div class="wallet-network-hint">Public address beginning with 0x</div>
+                                    <div class="wallet-network-hint">Starts with 0x</div>
                                 </div>
                             </div>
                             """,
                             unsafe_allow_html=True,
                         )
-                        eth_watch_input = st.text_area(
+                        eth_watch_input = st.text_input(
                             "Ethereum Wallet Address",
                             value=DEFAULT_ETH_WATCH,
-                            height=112,
                             placeholder="0x...",
                             label_visibility="collapsed",
                         )
@@ -12600,55 +12940,58 @@ with main_col:
                                 <div class="wallet-network-icon wallet-network-icon-btc">₿</div>
                                 <div>
                                     <div class="wallet-network-title">Bitcoin Wallet</div>
-                                    <div class="wallet-network-hint">Public address beginning with bc1, 1 or 3</div>
+                                    <div class="wallet-network-hint">Starts with bc1, 1 or 3</div>
                                 </div>
                             </div>
                             """,
                             unsafe_allow_html=True,
                         )
-                        btc_watch_input = st.text_area(
+                        btc_watch_input = st.text_input(
                             "Bitcoin Wallet Address",
                             value=DEFAULT_BTC_WATCH,
-                            height=112,
                             placeholder="bc1... / 1... / 3...",
                             label_visibility="collapsed",
                         )
 
                 st.markdown(
-                    """
-                    <div class="wallet-search-divider"></div>
-                    <div class="wallet-search-heading">
-                        <div>
-                            <div class="wallet-search-title">Search Depth</div>
-                            <div class="wallet-search-note">
-                                Choose how many recent transactions to retrieve for each address.
-                            </div>
-                        </div>
-                    </div>
-                    """,
+                    "<div class='wallet-search-divider'></div>",
                     unsafe_allow_html=True,
                 )
 
-                slider_col, action_col = st.columns([3.25, 1.0], gap="large")
-
-                with slider_col:
-                    watch_limit = st.slider(
-                        "Recent Transactions Per Address",
-                        5,
-                        30,
-                        min(max(WATCH_TX_LIMIT, 5), 30),
-                        5,
+                with st.container(key="wallet_search_controls"):
+                    search_copy_col, slider_col, action_col = st.columns(
+                        [1.15, 2.15, 0.95],
+                        gap="large",
                     )
 
-                with action_col:
-                    st.markdown(
-                        "<div class='wallet-action-spacer'></div>",
-                        unsafe_allow_html=True,
-                    )
-                    run_watchlist_btn = st.form_submit_button(
-                        "Search Wallet Activity",
-                        use_container_width=True,
-                    )
+                    with search_copy_col:
+                        st.markdown(
+                            """
+                            <div class="wallet-search-copy">
+                                <div class="wallet-search-title">Search Depth</div>
+                                <div class="wallet-search-note">
+                                    Recent transactions retrieved per address.
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+
+                    with slider_col:
+                        watch_limit = st.slider(
+                            "Recent Transactions Per Address",
+                            5,
+                            30,
+                            min(max(WATCH_TX_LIMIT, 5), 30),
+                            5,
+                            label_visibility="collapsed",
+                        )
+
+                    with action_col:
+                        run_watchlist_btn = st.form_submit_button(
+                            "Search Wallet",
+                            use_container_width=True,
+                        )
 
 
 # =========================================================
