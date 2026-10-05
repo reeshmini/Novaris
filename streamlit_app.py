@@ -11371,6 +11371,128 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
     flex: 0 0 248px !important;
 }
 
+
+/* =========================================================
+   HOME LOWER SECTION — STRETCH LATEST TRANSFERS TO NEWS BASE
+   ========================================================= */
+
+/*
+   The right column is naturally taller because it contains both
+   Transaction Timeline and Market News. Stretch the LEFT column to
+   that same natural height, then let the four Latest Transfers rows
+   share the remaining vertical space evenly.
+*/
+
+/* Both columns in the lower-home row share the tallest column height. */
+[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel) {
+    align-items: stretch !important;
+}
+
+/* Make each Streamlit column a stretchable flex column. */
+[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel)
+    > [data-testid="stColumn"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-self: stretch !important;
+}
+
+/* Allow the column's internal vertical wrapper to consume full height. */
+[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel)
+    > [data-testid="stColumn"]
+    > [data-testid="stVerticalBlock"] {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+}
+
+/* Latest Transfers outer card fills the complete left-column height. */
+.st-key-home_alerts_panel {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+
+    height: auto !important;
+    min-height: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Stretch the actual bordered Streamlit container, not only its key wrapper. */
+.st-key-home_alerts_panel > [data-testid="stVerticalBlockBorderWrapper"],
+.st-key-home_alerts_panel [data-testid="stVerticalBlockBorderWrapper"] {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+
+    height: 100% !important;
+    min-height: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* The content stack inside Latest Transfers fills the bordered card. */
+.st-key-home_alerts_panel [data-testid="stVerticalBlock"] {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+
+    height: 100% !important;
+    min-height: 0 !important;
+}
+
+/*
+   Each transaction row is rendered by its own st.markdown element.
+   Let the four row-elements grow equally so the final row ends at the
+   same baseline as the Market News card.
+*/
+.st-key-home_alerts_panel
+    [data-testid="stElementContainer"]:has(.home-transfer-card-shell) {
+    display: flex !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+}
+
+/* Carry the full available height through Streamlit's markdown wrappers. */
+.st-key-home_alerts_panel
+    [data-testid="stElementContainer"]:has(.home-transfer-card-shell)
+    [data-testid="stMarkdownContainer"],
+.st-key-home_alerts_panel
+    [data-testid="stElementContainer"]:has(.home-transfer-card-shell)
+    [data-testid="stMarkdown"] {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Each transfer shell and card fill its allocated quarter of the space. */
+.st-key-home_alerts_panel .home-transfer-card-shell {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+}
+
+.st-key-home_alerts_panel .home-transfer-card-shell .alert-card {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+
+    margin-bottom: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Do not force the old fixed 640px height anymore. */
+.st-key-home_alerts_panel {
+    max-height: none !important;
+}
+
+/* Right cards retain their existing content-driven dimensions. */
+.st-key-home_timeline_card,
+.st-key-home_news_preview_card {
+    flex-shrink: 0 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
