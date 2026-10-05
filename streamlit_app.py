@@ -9252,6 +9252,289 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   WALLET ACTIVITY RESULTS — MATCH WALLET LOOKUP CARD
+   ========================================================= */
+
+.st-key-topnav_watchlist_results_card {
+    position: relative !important;
+    overflow: hidden !important;
+
+    margin-top: 16px !important;
+    padding: 0 !important;
+
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255,178,30,0.065), transparent 28%),
+        linear-gradient(180deg, rgba(12,12,12,0.995), rgba(5,5,5,1)) !important;
+
+    border: 1px solid rgba(255,178,30,0.30) !important;
+    border-radius: 20px !important;
+
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.035),
+        0 0 16px rgba(255,178,30,0.09),
+        0 14px 34px rgba(0,0,0,0.36) !important;
+}
+
+/* Same restrained amber top accent used by the lookup card. */
+.st-key-topnav_watchlist_results_card::before {
+    content: "" !important;
+
+    position: absolute !important;
+    top: 0 !important;
+    left: 18px !important;
+    right: 18px !important;
+
+    height: 2px !important;
+    border-radius: 999px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,178,30,0.92),
+            transparent
+        ) !important;
+
+    box-shadow: 0 0 14px rgba(255,178,30,0.22) !important;
+}
+
+.st-key-topnav_watchlist_results_card:hover {
+    transform: none !important;
+}
+
+/* Remove Streamlit's inner bordered-container treatment. */
+.st-key-topnav_watchlist_results_card [data-testid="stVerticalBlockBorderWrapper"] {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+/* Header mirrors the visual language of the wallet lookup top bar. */
+.wallet-results-header {
+    min-height: 74px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 18px !important;
+
+    padding: 17px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,178,30,0.016) 45%,
+            rgba(255,255,255,0.005)
+        ) !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.065) !important;
+}
+
+.wallet-results-title {
+    color: #F5F1E9 !important;
+
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 1.08rem !important;
+    font-weight: 820 !important;
+    line-height: 1.18 !important;
+    letter-spacing: -0.01em !important;
+
+    text-transform: none !important;
+}
+
+.wallet-results-subtitle {
+    margin-top: 5px !important;
+
+    color: #8F897F !important;
+    font-size: 0.76rem !important;
+    font-weight: 560 !important;
+    line-height: 1.38 !important;
+}
+
+.wallet-results-count {
+    flex: 0 0 auto !important;
+
+    padding: 6px 10px !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,178,30,0.20) !important;
+
+    background: rgba(255,178,30,0.055) !important;
+    color: #D9B86C !important;
+
+    font-size: 0.66rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.08em !important;
+}
+
+/* Dark scrollable table instead of the bright default dataframe. */
+.wallet-results-table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+
+    padding: 14px 14px 16px 14px !important;
+    box-sizing: border-box !important;
+
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(255,178,30,0.28) rgba(255,255,255,0.025) !important;
+}
+
+.wallet-results-table-wrap::-webkit-scrollbar {
+    height: 8px !important;
+}
+
+.wallet-results-table-wrap::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.025) !important;
+    border-radius: 999px !important;
+}
+
+.wallet-results-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(255,178,30,0.26) !important;
+    border-radius: 999px !important;
+}
+
+.wallet-results-table {
+    width: 100% !important;
+    min-width: 1060px !important;
+
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+
+    overflow: hidden !important;
+
+    border: 1px solid rgba(255,255,255,0.075) !important;
+    border-radius: 13px !important;
+
+    background: rgba(9,9,9,0.98) !important;
+
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.wallet-results-table thead th {
+    padding: 11px 12px !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,0.035),
+            rgba(255,255,255,0.015)
+        ) !important;
+
+    color: #9D968C !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.075) !important;
+
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0.075em !important;
+    text-transform: uppercase !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+}
+
+.wallet-results-table tbody td {
+    padding: 12px !important;
+
+    color: #D8D4CC !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.055) !important;
+
+    font-size: 0.76rem !important;
+    font-weight: 560 !important;
+    line-height: 1.34 !important;
+    white-space: nowrap !important;
+}
+
+.wallet-results-table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+.wallet-results-table tbody tr {
+    transition:
+        background 0.15s ease,
+        box-shadow 0.15s ease !important;
+}
+
+.wallet-results-table tbody tr:hover {
+    background: rgba(255,178,30,0.035) !important;
+    box-shadow: inset 2px 0 0 rgba(255,178,30,0.52) !important;
+}
+
+.wallet-mono {
+    color: #B9C6D4 !important;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace !important;
+    font-size: 0.72rem !important;
+}
+
+.wallet-number {
+    color: #F1EEE7 !important;
+    font-variant-numeric: tabular-nums !important;
+    font-weight: 690 !important;
+}
+
+.wallet-chain-chip,
+.wallet-asset-chip,
+.wallet-risk-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+
+    padding: 4px 8px !important;
+
+    border-radius: 999px !important;
+
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+}
+
+.wallet-chain-chip {
+    color: #DCEBFF !important;
+    background: rgba(70,145,255,0.095) !important;
+    border: 1px solid rgba(91,169,255,0.23) !important;
+}
+
+.wallet-asset-chip {
+    color: #F6DFAC !important;
+    background: rgba(255,178,30,0.065) !important;
+    border: 1px solid rgba(255,178,30,0.17) !important;
+}
+
+.wallet-risk-low {
+    color: #BCECD0 !important;
+    background: rgba(72,196,125,0.080) !important;
+    border: 1px solid rgba(72,196,125,0.20) !important;
+}
+
+.wallet-risk-medium {
+    color: #F5D793 !important;
+    background: rgba(255,178,30,0.080) !important;
+    border: 1px solid rgba(255,178,30,0.20) !important;
+}
+
+.wallet-risk-high {
+    color: #FFC4C4 !important;
+    background: rgba(255,84,84,0.080) !important;
+    border: 1px solid rgba(255,84,84,0.20) !important;
+}
+
+.wallet-risk-neutral {
+    color: #CCC7BE !important;
+    background: rgba(255,255,255,0.045) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+}
+
+@media (max-width: 900px) {
+    .wallet-results-header {
+        align-items: flex-start !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -13398,25 +13681,111 @@ with main_col:
             )
         else:
             with st.container(border=True, key="topnav_watchlist_results_card"):
+                result_count = len(watchlist_final_df)
+
                 st.markdown(
-                    "<div class='overview-card-heading'>WALLET ACTIVITY RESULTS</div>",
+                    (
+                        '<div class="wallet-results-header">'
+                        '<div>'
+                        '<div class="wallet-results-title">Wallet Activity Results</div>'
+                        '<div class="wallet-results-subtitle">'
+                        'Recent on-chain activity matching the wallet address search.'
+                        '</div>'
+                        '</div>'
+                        f'<div class="wallet-results-count">{result_count} RESULT'
+                        f'{"S" if result_count != 1 else ""}</div>'
+                        '</div>'
+                    ),
                     unsafe_allow_html=True,
                 )
 
-                st.dataframe(
-                    watchlist_final_df[[
-                        "timestamp",
-                        "chain",
-                        "asset_symbol",
-                        "watch_address",
-                        "direction",
-                        "amount_native",
-                        "amount_usd",
-                        "final_risk",
-                        "tx_hash",
-                    ]],
-                    use_container_width=True,
+                result_rows = []
+                result_view = watchlist_final_df[[
+                    "timestamp",
+                    "chain",
+                    "asset_symbol",
+                    "watch_address",
+                    "direction",
+                    "amount_native",
+                    "amount_usd",
+                    "final_risk",
+                    "tx_hash",
+                ]].copy()
+
+                for _, result_row in result_view.iterrows():
+                    timestamp_value = result_row.get("timestamp")
+                    try:
+                        timestamp_text = pd.to_datetime(timestamp_value).strftime("%d %b %Y, %H:%M")
+                    except Exception:
+                        timestamp_text = str(timestamp_value or "—")
+
+                    chain_text = str(result_row.get("chain") or "—")
+                    asset_text = str(result_row.get("asset_symbol") or "—")
+                    wallet_text = short_addr(result_row.get("watch_address"), 9, 6)
+                    direction_text = str(result_row.get("direction") or "—").title()
+
+                    amount_native_value = result_row.get("amount_native")
+                    amount_native_text = format_amount(amount_native_value)
+
+                    amount_usd_value = result_row.get("amount_usd")
+                    if pd.isna(amount_usd_value):
+                        amount_usd_text = "—"
+                    else:
+                        try:
+                            amount_usd_text = f"${float(amount_usd_value):,.0f}"
+                        except Exception:
+                            amount_usd_text = str(amount_usd_value)
+
+                    risk_text = str(result_row.get("final_risk") or "—").title()
+                    risk_class = {
+                        "high": "wallet-risk-high",
+                        "medium": "wallet-risk-medium",
+                        "low": "wallet-risk-low",
+                    }.get(risk_text.lower(), "wallet-risk-neutral")
+
+                    tx_hash_full = str(result_row.get("tx_hash") or "")
+                    tx_hash_text = short_addr(tx_hash_full, 10, 7)
+
+                    result_rows.append(
+                        '<tr>'
+                        f'<td>{html.escape(timestamp_text)}</td>'
+                        f'<td><span class="wallet-chain-chip">{html.escape(chain_text)}</span></td>'
+                        f'<td><span class="wallet-asset-chip">{html.escape(asset_text)}</span></td>'
+                        f'<td class="wallet-mono" title="{html.escape(str(result_row.get("watch_address") or ""), quote=True)}">'
+                        f'{html.escape(wallet_text)}</td>'
+                        f'<td>{html.escape(direction_text)}</td>'
+                        f'<td class="wallet-number">{html.escape(amount_native_text)}</td>'
+                        f'<td class="wallet-number">{html.escape(amount_usd_text)}</td>'
+                        f'<td><span class="wallet-risk-chip {risk_class}">{html.escape(risk_text)}</span></td>'
+                        f'<td class="wallet-mono" title="{html.escape(tx_hash_full, quote=True)}">'
+                        f'{html.escape(tx_hash_text)}</td>'
+                        '</tr>'
+                    )
+
+                results_table_html = (
+                    '<div class="wallet-results-table-wrap">'
+                    '<table class="wallet-results-table">'
+                    '<thead>'
+                    '<tr>'
+                    '<th>Timestamp</th>'
+                    '<th>Chain</th>'
+                    '<th>Asset</th>'
+                    '<th>Wallet</th>'
+                    '<th>Direction</th>'
+                    '<th>Amount</th>'
+                    '<th>USD Value</th>'
+                    '<th>Risk</th>'
+                    '<th>Transaction</th>'
+                    '</tr>'
+                    '</thead>'
+                    '<tbody>'
+                    + ''.join(result_rows)
+                    + '</tbody>'
+                    '</table>'
+                    '</div>'
                 )
+
+                st.markdown(results_table_html, unsafe_allow_html=True)
         st.stop()
 
     if nav_view == "news":
