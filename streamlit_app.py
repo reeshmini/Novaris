@@ -12364,32 +12364,35 @@ def render_full_alerts_page(
             else ""
         )
 
+        # Keep each alert card as compact HTML with no leading indentation.
+        # Leading spaces in a multi-line string can be interpreted by Markdown
+        # as a code block, which is why later cards were appearing as raw HTML.
         card_html_parts.append(
-            f"""
-            <div class="full-alert-card-shell">
-                <div class="alert-card {whale_class}">
-                    <div class="alert-row">
-                        <div class="alert-left">
-                            <div class="asset-circle">{get_alert_asset_icon(row['asset_symbol'], row['chain'])}</div>
-                            <div class="alert-content">
-                                <div class="alert-title">
-                                    <span class="alert-amount">{amount_txt}</span>
-                                    <span class="alert-usd">{usd_txt}</span>
-                                </div>
-                                <div class="alert-sub">{line2}</div>
-                                <div class="alert-badges">
-                                    <span class="badge {chain_badge}">{row['chain']}</span>
-                                    <span class="badge {risk_badge}">{row['final_risk']}</span>
-                                    <span class="badge {source_badge}">{source_text}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="alert-time">{human_age(row["timestamp"])}</div>
-                    </div>
-                    {detail_button_html}
-                </div>
-            </div>
-            """
+            (
+                f'<div class="full-alert-card-shell">'
+                f'<div class="alert-card {whale_class}">'
+                f'<div class="alert-row">'
+                f'<div class="alert-left">'
+                f'<div class="asset-circle">{get_alert_asset_icon(row["asset_symbol"], row["chain"])}</div>'
+                f'<div class="alert-content">'
+                f'<div class="alert-title">'
+                f'<span class="alert-amount">{amount_txt}</span>'
+                f'<span class="alert-usd">{usd_txt}</span>'
+                f'</div>'
+                f'<div class="alert-sub">{line2}</div>'
+                f'<div class="alert-badges">'
+                f'<span class="badge {chain_badge}">{row["chain"]}</span>'
+                f'<span class="badge {risk_badge}">{row["final_risk"]}</span>'
+                f'<span class="badge {source_badge}">{source_text}</span>'
+                f'</div>'
+                f'</div>'
+                f'</div>'
+                f'<div class="alert-time">{human_age(row["timestamp"])}</div>'
+                f'</div>'
+                f'{detail_button_html}'
+                f'</div>'
+                f'</div>'
+            )
         )
 
     cards_html = "".join(card_html_parts)
