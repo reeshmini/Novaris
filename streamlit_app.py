@@ -10657,6 +10657,16 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   WHALE ALERTS HEADER — UPPERCASE
+   ========================================================= */
+
+.whale-monitor-kicker {
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -13204,7 +13214,7 @@ def render_full_alerts_page(
     panel_empty_class = "whale-monitor-empty" if is_whale_page else "transfer-monitor-empty"
 
     if is_whale_page:
-        panel_kicker = "Whale Alerts"
+        panel_kicker = "WHALE ALERTS"
         panel_support = (
             "Bitcoin and Ethereum transactions meeting the configured whale threshold."
         )
