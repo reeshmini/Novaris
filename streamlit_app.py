@@ -9816,6 +9816,198 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   TRANSFERS PAGE — MATCH ALERTS PANEL TYPOGRAPHY / STRUCTURE
+   ========================================================= */
+
+/* Remove any legacy standalone Latest Transfers heading. */
+.latest-alerts-title {
+    display: none !important;
+}
+
+/* Same outer shell as the Alerts page. */
+.transfer-monitor-panel {
+    position: relative !important;
+    width: var(--novaris-detail-page-width) !important;
+    max-width: 1280px !important;
+    box-sizing: border-box !important;
+
+    margin: 8px auto 28px auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    border: 1px solid rgba(255,178,30,0.30) !important;
+    border-radius: 20px !important;
+
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255,178,30,0.065), transparent 28%),
+        linear-gradient(180deg, rgba(12,12,12,0.995), rgba(5,5,5,1)) !important;
+
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.035),
+        0 0 16px rgba(255,178,30,0.09),
+        0 14px 34px rgba(0,0,0,0.36) !important;
+}
+
+/* Same restrained top accent. */
+.transfer-monitor-panel::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 18px !important;
+    right: 18px !important;
+    height: 2px !important;
+    z-index: 3 !important;
+
+    border-radius: 999px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,178,30,0.92),
+            transparent
+        ) !important;
+
+    box-shadow: 0 0 14px rgba(255,178,30,0.22) !important;
+}
+
+/* Same small heading treatment as LARGE TRANSFER ACTIVITY. */
+.transfer-monitor-topbar {
+    min-height: 74px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    padding: 17px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,178,30,0.018) 46%,
+            rgba(255,255,255,0.006)
+        ) !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.065) !important;
+}
+
+.transfer-monitor-kicker {
+    color: #F2D792 !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.13em !important;
+    text-transform: uppercase !important;
+}
+
+.transfer-monitor-support {
+    margin-top: 5px !important;
+
+    color: #8F897F !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 560 !important;
+    line-height: 1.40 !important;
+}
+
+.transfer-monitor-list {
+    padding: 18px 18px 6px 18px !important;
+}
+
+.transfer-monitor-panel .full-alert-card-shell {
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 0 0 14px 0 !important;
+    padding: 0 !important;
+
+    perspective: 1000px !important;
+}
+
+.transfer-monitor-panel .full-alert-card-shell:last-child {
+    margin-bottom: 12px !important;
+}
+
+/* Transfer cards retain the amber visual language. */
+.transfer-monitor-panel .alert-card {
+    border-radius: 16px !important;
+
+    border-color: rgba(255,178,30,0.18) !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(18,18,18,0.94),
+            rgba(8,8,8,0.985)
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.025),
+        0 7px 18px rgba(0,0,0,0.22) !important;
+
+    transform: translateY(0) scale(1) !important;
+    transform-origin: center center !important;
+
+    transition:
+        transform 0.20s ease,
+        border-color 0.20s ease,
+        box-shadow 0.20s ease,
+        background 0.20s ease !important;
+}
+
+/* Same premium 3D motion as the Alerts page, but amber. */
+.transfer-monitor-panel .alert-card:hover {
+    transform: translateY(-4px) scale(1.006) !important;
+
+    border-color: rgba(255,178,30,0.42) !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(22,22,22,0.98),
+            rgba(8,8,8,0.995)
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.045),
+        0 0 0 1px rgba(255,178,30,0.022),
+        0 0 20px rgba(255,178,30,0.10),
+        0 14px 28px rgba(0,0,0,0.42) !important;
+}
+
+.transfer-monitor-empty {
+    padding: 24px 20px 26px 20px !important;
+
+    color: #8F897F !important;
+    font-size: 0.80rem !important;
+    font-weight: 560 !important;
+}
+
+@media (max-width: 1400px) {
+    .transfer-monitor-panel {
+        max-width: 1180px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .transfer-monitor-panel {
+        width: calc(100vw - 28px) !important;
+        max-width: none !important;
+    }
+
+    .transfer-monitor-list {
+        padding: 14px 12px 4px 12px !important;
+    }
+
+    .transfer-monitor-panel .alert-card:hover {
+        transform: translateY(-2px) scale(1.002) !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -12335,36 +12527,43 @@ def render_full_alerts_page(
     """Render transfers using the standard NOVARIS transaction alert cards."""
     is_whale_page = str(detail_kind).lower() == "whale"
 
-    # Latest Transfers keeps its existing page title.
-    # The Whale Alerts page intentionally has no standalone "Whale Alerts" heading.
-    if not is_whale_page:
-        st.markdown(
-            f"<div class='latest-alerts-title'>{html.escape(page_title)}</div>",
-            unsafe_allow_html=True,
+    # Both full transaction pages use the same compact panel-heading treatment.
+    # There is no standalone large page title above the cards.
+    panel_class = "whale-monitor-panel" if is_whale_page else "transfer-monitor-panel"
+    panel_topbar_class = "whale-monitor-topbar" if is_whale_page else "transfer-monitor-topbar"
+    panel_kicker_class = "whale-monitor-kicker" if is_whale_page else "transfer-monitor-kicker"
+    panel_support_class = "whale-monitor-support" if is_whale_page else "transfer-monitor-support"
+    panel_list_class = "whale-monitor-list" if is_whale_page else "transfer-monitor-list"
+    panel_empty_class = "whale-monitor-empty" if is_whale_page else "transfer-monitor-empty"
+
+    if is_whale_page:
+        panel_kicker = "LARGE TRANSFER ACTIVITY"
+        panel_support = (
+            "Bitcoin and Ethereum transactions meeting the configured whale threshold."
         )
+        empty_text = "No qualifying large transfers found in the current monitoring window."
+    else:
+        panel_kicker = "RECENT TRANSFER ACTIVITY"
+        panel_support = (
+            "Most recent Bitcoin and Ethereum transfers indexed by NOVARIS."
+        )
+        empty_text = "No recent transfers found in the current monitoring window."
 
     if all_alerts_df.empty:
-        if is_whale_page:
-            st.markdown(
-                """
-                <div class="whale-monitor-panel">
-                    <div class="whale-monitor-topbar">
-                        <div>
-                            <div class="whale-monitor-kicker">LARGE TRANSFER ACTIVITY</div>
-                            <div class="whale-monitor-support">
-                                Bitcoin and Ethereum transactions meeting the configured whale threshold.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="whale-monitor-empty">
-                        No qualifying large transfers found in the current monitoring window.
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        else:
-            st.info("No transactions found in the current scan window.")
+        st.markdown(
+            (
+                f'<div class="{panel_class}">'
+                f'<div class="{panel_topbar_class}">'
+                f'<div>'
+                f'<div class="{panel_kicker_class}">{panel_kicker}</div>'
+                f'<div class="{panel_support_class}">{panel_support}</div>'
+                f'</div>'
+                f'</div>'
+                f'<div class="{panel_empty_class}">{empty_text}</div>'
+                f'</div>'
+            ),
+            unsafe_allow_html=True,
+        )
         return
 
     display_df = (
@@ -12467,27 +12666,22 @@ def render_full_alerts_page(
 
     cards_html = "".join(card_html_parts)
 
-    if is_whale_page:
-        st.markdown(
-            (
-                '<div class="whale-monitor-panel">'
-                '<div class="whale-monitor-topbar">'
-                '<div>'
-                '<div class="whale-monitor-kicker">LARGE TRANSFER ACTIVITY</div>'
-                '<div class="whale-monitor-support">'
-                'Bitcoin and Ethereum transactions meeting the configured whale threshold.'
-                '</div>'
-                '</div>'
-                '</div>'
-                '<div class="whale-monitor-list">'
-                f'{cards_html}'
-                '</div>'
-                '</div>'
-            ),
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(cards_html, unsafe_allow_html=True)
+    st.markdown(
+        (
+            f'<div class="{panel_class}">'
+            f'<div class="{panel_topbar_class}">'
+            f'<div>'
+            f'<div class="{panel_kicker_class}">{panel_kicker}</div>'
+            f'<div class="{panel_support_class}">{panel_support}</div>'
+            f'</div>'
+            f'</div>'
+            f'<div class="{panel_list_class}">'
+            f'{cards_html}'
+            f'</div>'
+            f'</div>'
+        ),
+        unsafe_allow_html=True,
+    )
 
 
 # =========================================================
