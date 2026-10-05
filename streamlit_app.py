@@ -10008,6 +10008,185 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   MARKET PAGE — MATCH ALERTS / TRANSFERS PANEL STRUCTURE
+   ========================================================= */
+
+/* The legacy large page hero is no longer rendered. */
+.market-page-hero {
+    display: none !important;
+}
+
+/* Same premium outer panel used across Alerts and Transfers. */
+.market-monitor-panel {
+    position: relative !important;
+
+    width: var(--novaris-detail-page-width) !important;
+    max-width: 1280px !important;
+    box-sizing: border-box !important;
+
+    margin: 8px auto 28px auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    border: 1px solid rgba(255,178,30,0.30) !important;
+    border-radius: 20px !important;
+
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255,178,30,0.065), transparent 28%),
+        linear-gradient(180deg, rgba(12,12,12,0.995), rgba(5,5,5,1)) !important;
+
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.035),
+        0 0 16px rgba(255,178,30,0.09),
+        0 14px 34px rgba(0,0,0,0.36) !important;
+}
+
+/* Same restrained amber accent at the top. */
+.market-monitor-panel::before {
+    content: "" !important;
+
+    position: absolute !important;
+    top: 0 !important;
+    left: 18px !important;
+    right: 18px !important;
+    z-index: 3 !important;
+
+    height: 2px !important;
+    border-radius: 999px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,178,30,0.92),
+            transparent
+        ) !important;
+
+    box-shadow: 0 0 14px rgba(255,178,30,0.22) !important;
+}
+
+/* Compact page heading — same typography as Alerts / Transfers. */
+.market-monitor-topbar {
+    min-height: 74px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    padding: 17px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,178,30,0.018) 46%,
+            rgba(255,255,255,0.006)
+        ) !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.065) !important;
+}
+
+.market-monitor-kicker {
+    color: #F2D792 !important;
+
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.13em !important;
+    text-transform: uppercase !important;
+}
+
+.market-monitor-support {
+    margin-top: 5px !important;
+
+    color: #8F897F !important;
+
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 560 !important;
+    line-height: 1.40 !important;
+}
+
+/* Give the table breathing room inside the unified panel. */
+.market-monitor-content {
+    padding: 18px !important;
+}
+
+/* The inner table no longer needs to act like a second large outer card. */
+.market-monitor-panel .market-table-shell {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+
+    border-radius: 15px !important;
+    border: 1px solid rgba(255,255,255,0.075) !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(15,15,15,0.94),
+            rgba(7,7,7,0.985)
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.018),
+        0 7px 18px rgba(0,0,0,0.20) !important;
+}
+
+/* Rows get the same subtle depth interaction used elsewhere. */
+.market-monitor-panel .market-row-link .market-table-row {
+    transform: translateY(0) !important;
+
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease !important;
+}
+
+.market-monitor-panel .market-row-link:hover .market-table-row,
+.market-monitor-panel .market-row-link:focus-visible .market-table-row {
+    transform: translateY(-2px) !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,255,255,0.016) 44%,
+            transparent
+        ) !important;
+
+    box-shadow:
+        inset 3px 0 0 rgba(255,178,30,0.72),
+        0 7px 16px rgba(0,0,0,0.22) !important;
+}
+
+/* Preserve the source footer, but make it feel integrated. */
+.market-monitor-panel .market-source-row {
+    border-top: 1px solid rgba(255,255,255,0.060) !important;
+    background: rgba(255,255,255,0.008) !important;
+}
+
+/* Responsive sizing consistent with the other full pages. */
+@media (max-width: 1400px) {
+    .market-monitor-panel {
+        max-width: 1180px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .market-monitor-panel {
+        width: calc(100vw - 28px) !important;
+        max-width: none !important;
+    }
+
+    .market-monitor-content {
+        padding: 14px 12px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -12233,18 +12412,6 @@ def _market_sparkline_svg(values, asset_symbol):
 
 def render_market_page(prices, market_df: pd.DataFrame):
     """Render NOVARIS Crypto Market Prices using the CoinGecko market snapshot."""
-    st.markdown(
-        """
-        <div class="market-page-hero">
-            <div class="market-page-title">Crypto Market Prices</div>
-            <div class="market-page-subtitle">
-                Bitcoin and Ethereum spot prices with recent market movement.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
     market_lookup = {}
     if market_df is not None and not market_df.empty:
         for _, row in market_df.iterrows():
@@ -12270,6 +12437,16 @@ def render_market_page(prices, market_df: pd.DataFrame):
     # so opening the shell in one call and adding rows in later calls caused
     # the rows to escape the centred container and stretch across the page.
     market_html = [
+        '<div class="market-monitor-panel">',
+        '<div class="market-monitor-topbar">',
+        '<div>',
+        '<div class="market-monitor-kicker">CRYPTO MARKET OVERVIEW</div>',
+        '<div class="market-monitor-support">'
+        'Bitcoin and Ethereum spot prices with recent market movement.'
+        '</div>',
+        '</div>',
+        '</div>',
+        '<div class="market-monitor-content">',
         '<div class="market-table-shell">',
         '<div class="market-table-header">',
         '<div>ASSET</div>',
@@ -12376,6 +12553,8 @@ def render_market_page(prices, market_df: pd.DataFrame):
             '<strong>CoinGecko</strong>',
             '<span class="market-source-dot">•</span>',
             '<span>24H change and recent sparkline are market-data estimates.</span>',
+            '</div>',
+            '</div>',
             '</div>',
             '</div>',
         ]
