@@ -11176,6 +11176,60 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
         ) !important;
 }
 
+
+/* =========================================================
+   HEADER — CENTER LIVE FEED WITH SETTINGS BUTTON
+   ========================================================= */
+
+/* Use exactly the same vertical box as the 44px Settings control. */
+.brand-live-status {
+    top: 0.43rem !important;
+    right: 4.55rem !important;
+
+    height: 44px !important;
+    min-height: 44px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 7px !important;
+
+    line-height: 1 !important;
+}
+
+/* Vertically centre both wording spans inside the same 44px line as the gear. */
+.brand-live-status > span:not(.brand-live-dot) {
+    height: 44px !important;
+    min-height: 44px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    line-height: 1 !important;
+    vertical-align: middle !important;
+}
+
+/* Keep the green dot centred on that same horizontal axis. */
+.brand-live-status > .brand-live-dot {
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    align-self: center !important;
+    transform: none !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
