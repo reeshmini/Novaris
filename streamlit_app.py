@@ -10667,6 +10667,35 @@ information icon. This preserves both full-card navigation and tooltip hover.
     letter-spacing: 0.08em !important;
 }
 
+
+/* =========================================================
+   TRANSFERS HEADER — WHITE, LARGER, UPPERCASE
+   ========================================================= */
+
+.transfer-monitor-kicker {
+    color: #F5F1E9 !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 1.20rem !important;
+    font-weight: 850 !important;
+    line-height: 1.18 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+}
+
+.transfer-monitor-support {
+    margin-top: 6px !important;
+    color: #9D968C !important;
+    font-size: 0.80rem !important;
+    font-weight: 560 !important;
+    line-height: 1.42 !important;
+}
+
+@media (max-width: 900px) {
+    .transfer-monitor-kicker {
+        font-size: 1.04rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
