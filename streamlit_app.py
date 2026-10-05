@@ -10783,6 +10783,180 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   SETTINGS PAGE — INTEGRATED PANEL HEADER
+   ========================================================= */
+
+/* No separate page hero; the SETTINGS heading now lives inside the card. */
+.settings-page-hero {
+    display: none !important;
+}
+
+/* The settings card should use the same structured topbar approach as the other pages. */
+.st-key-monitoring_controls_card {
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin-top: 18px !important;
+}
+
+/* Create a proper premium header area inside the settings card. */
+.settings-panel-topbar {
+    min-height: 78px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    margin: 0 !important;
+    padding: 17px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,178,30,0.018) 46%,
+            rgba(255,255,255,0.006)
+        ) !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.065) !important;
+}
+
+.settings-panel-heading-row {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    overflow: visible !important;
+}
+
+.settings-panel-title {
+    color: #F5F1E9 !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 1.20rem !important;
+    font-weight: 850 !important;
+    line-height: 1.18 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+}
+
+.settings-panel-support {
+    margin-top: 6px !important;
+    color: #9D968C !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.80rem !important;
+    font-weight: 560 !important;
+    line-height: 1.42 !important;
+}
+
+/* Keep the tooltip aligned with the new in-card title. */
+.settings-panel-heading-row .metric-info-tooltip {
+    margin-top: 3px !important;
+    flex-shrink: 0 !important;
+}
+
+.settings-panel-heading-row .metric-tooltip-bubble {
+    min-width: 320px !important;
+    max-width: 430px !important;
+}
+
+/* Give the form content its own inner padding after the new topbar. */
+.st-key-monitoring_controls_card [data-testid="stForm"] {
+    margin-top: 0 !important;
+    padding: 20px 24px 24px 24px !important;
+}
+
+/* Responsive sizing aligned with the other page headings. */
+@media (max-width: 900px) {
+    .settings-panel-title {
+        font-size: 1.04rem !important;
+    }
+
+    .st-key-monitoring_controls_card [data-testid="stForm"] {
+        padding: 18px !important;
+    }
+}
+
+
+/* =========================================================
+   SETTINGS HEADER — EXACT MATCH TO MARKET/ALERTS/TRANSFERS
+   ========================================================= */
+
+/* Make the settings card header use the exact same treatment
+   as CRYPTO MARKET OVERVIEW and the other top panel headers. */
+.settings-panel-topbar {
+    min-height: 74px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    margin: 0 !important;
+    padding: 17px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,178,30,0.018) 46%,
+            rgba(255,255,255,0.006)
+        ) !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.065) !important;
+}
+
+.settings-panel-heading-row {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    overflow: visible !important;
+}
+
+.settings-panel-title {
+    color: #F5F1E9 !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 1.20rem !important;
+    font-weight: 850 !important;
+    line-height: 1.18 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+}
+
+.settings-panel-support {
+    margin-top: 6px !important;
+    color: #9D968C !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.80rem !important;
+    font-weight: 560 !important;
+    line-height: 1.42 !important;
+}
+
+/* Keep the tooltip aligned neatly without changing the header rhythm. */
+.settings-panel-heading-row .metric-info-tooltip {
+    margin-top: 2px !important;
+    flex-shrink: 0 !important;
+}
+
+.settings-panel-heading-row .metric-tooltip-bubble {
+    min-width: 320px !important;
+    max-width: 430px !important;
+}
+
+/* Keep the body content starting just below the matched header. */
+.st-key-monitoring_controls_card [data-testid="stForm"] {
+    margin-top: 0 !important;
+    padding: 20px 24px 24px 24px !important;
+}
+
+@media (max-width: 900px) {
+    .settings-panel-title {
+        font-size: 1.04rem !important;
+    }
+
+    .st-key-monitoring_controls_card [data-testid="stForm"] {
+        padding: 18px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -14044,26 +14218,25 @@ def render_monitoring_controls_page(prefs):
         "Saving also runs an immediate latest-block index using the updated settings."
     )
 
-    # Match the exact page-header treatment used by Latest Blockchain News.
-    st.markdown(
-        (
-            '<div class="news-hero settings-page-hero">'
-            '<div>'
-            '<div class="settings-title-row">'
-            '<div class="news-page-title">Settings</div>'
-            f'{settings_tooltip}'
-            '</div>'
-            '<div class="news-page-subtitle">'
-            'Configure how NOVARIS monitors blockchain activity, identifies '
-            'whale transfers and retrieves market-related news.'
-            '</div>'
-            '</div>'
-            '</div>'
-        ),
-        unsafe_allow_html=True,
-    )
-
     with st.container(border=True, key="monitoring_controls_card"):
+        st.markdown(
+            (
+                '<div class="settings-panel-topbar">'
+                '<div>'
+                '<div class="settings-panel-heading-row">'
+                '<div class="settings-panel-title">SETTINGS</div>'
+                f'{settings_tooltip}'
+                '</div>'
+                '<div class="settings-panel-support">'
+                'Configure how NOVARIS monitors blockchain activity, identifies '
+                'whale transfers and retrieves market-related news.'
+                '</div>'
+                '</div>'
+                '</div>'
+            ),
+            unsafe_allow_html=True,
+        )
+
         with st.form("monitoring_preferences_form", clear_on_submit=False):
 
             with st.container(key="settings_row_erc20"):
