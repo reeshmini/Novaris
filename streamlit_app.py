@@ -15332,7 +15332,7 @@ with main_col:
                 <div class="watchlist-empty-note wallet-empty-state">
                     <div class="wallet-empty-dot"></div>
                     <div>
-                        <div class="wallet-empty-title">Ready to inspect wallet activity</div>
+                        <div class="wallet-empty-title">READY TO INSPECT WALLET ACTIVITY</div>
                         <div class="wallet-empty-copy">
                             Enter a Bitcoin or Ethereum address above and run a search.
                             Matching transfers and NOVARIS risk signals will appear here.
