@@ -11007,6 +11007,115 @@ information icon. This preserves both full-card navigation and tooltip hover.
     color: #FFFFFF !important;
 }
 
+
+/* =========================================================
+   TRANSACTION DETAIL HEADERS — MATCH MAIN PAGE PANEL HEADERS
+   ========================================================= */
+
+.tx-page-title {
+    display: none !important;
+}
+
+.tx-detail-header-panel {
+    position: relative !important;
+    width: var(--novaris-detail-page-width) !important;
+    max-width: 1280px !important;
+    box-sizing: border-box !important;
+
+    margin: 0 auto 18px auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    border: 1px solid rgba(255,178,30,0.30) !important;
+    border-radius: 20px !important;
+
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255,178,30,0.065), transparent 28%),
+        linear-gradient(180deg, rgba(12,12,12,0.995), rgba(5,5,5,1)) !important;
+
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.035),
+        0 0 16px rgba(255,178,30,0.09),
+        0 14px 34px rgba(0,0,0,0.36) !important;
+}
+
+.tx-detail-header-panel::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 18px !important;
+    right: 18px !important;
+    z-index: 3 !important;
+
+    height: 2px !important;
+    border-radius: 999px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,178,30,0.92),
+            transparent
+        ) !important;
+
+    box-shadow: 0 0 14px rgba(255,178,30,0.22) !important;
+}
+
+.tx-detail-header-topbar {
+    min-height: 74px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    padding: 17px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,178,30,0.018) 46%,
+            rgba(255,255,255,0.006)
+        ) !important;
+}
+
+.tx-detail-header-title {
+    color: #F5F1E9 !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 1.20rem !important;
+    font-weight: 850 !important;
+    line-height: 1.18 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+}
+
+.tx-detail-header-support {
+    margin-top: 6px !important;
+
+    color: #9D968C !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.80rem !important;
+    font-weight: 560 !important;
+    line-height: 1.42 !important;
+}
+
+@media (max-width: 1400px) {
+    .tx-detail-header-panel {
+        max-width: 1180px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .tx-detail-header-panel {
+        width: calc(100vw - 28px) !important;
+        max-width: none !important;
+    }
+
+    .tx-detail-header-title {
+        font-size: 1.04rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -12620,9 +12729,14 @@ def render_transaction_detail_page(
     tx_hash = str(tx_hash or "").strip()
     detail_kind = str(detail_kind or "whale").strip().lower()
     detail_title = (
-        "Transfer Details"
+        "TRANSFER DETAILS"
         if detail_kind == "transfer"
-        else "Whale Alert Details"
+        else "WHALE ALERT DETAILS"
+    )
+    detail_subtitle = (
+        "Detailed information for the selected Bitcoin or Ethereum transfer."
+        if detail_kind == "transfer"
+        else "Detailed information for the selected transaction that met the configured whale threshold."
     )
 
     st.markdown("<div class='tx-detail-shell'>", unsafe_allow_html=True)
@@ -12630,6 +12744,20 @@ def render_transaction_detail_page(
         "<div class='tx-back-row'>"
         "<a class='tx-back-link' href='?' target='_self'>← Back to Dashboard</a>"
         "</div>",
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        (
+            '<div class="tx-detail-header-panel">'
+            '<div class="tx-detail-header-topbar">'
+            '<div>'
+            f'<div class="tx-detail-header-title">{html.escape(detail_title)}</div>'
+            f'<div class="tx-detail-header-support">{html.escape(detail_subtitle)}</div>'
+            '</div>'
+            '</div>'
+            '</div>'
+        ),
         unsafe_allow_html=True,
     )
 
@@ -12648,10 +12776,6 @@ def render_transaction_detail_page(
     ]
 
     if matched.empty:
-        st.markdown(
-            f"<div class='tx-page-title'>{html.escape(detail_title)}</div>",
-            unsafe_allow_html=True,
-        )
         st.markdown(
             "<div class='tx-not-found'>"
             "This transaction is no longer present in the current Novaris scan window. "
@@ -12721,11 +12845,6 @@ def render_transaction_detail_page(
         f"https://etherscan.io/tx/{tx_hash}"
         if chain == CHAIN_ETH
         else f"https://www.blockchain.com/explorer/transactions/btc/{tx_hash}"
-    )
-
-    st.markdown(
-        f"<div class='tx-page-title'>{html.escape(detail_title)}</div>",
-        unsafe_allow_html=True,
     )
 
     # Use the exact same card composition as the Whale Alerts list:
