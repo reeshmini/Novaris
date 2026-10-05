@@ -8518,6 +8518,303 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   NOVARIS — WHITE CENTRE-RIGHT ARROW CONTROLS
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   1) TOP KPI CARDS
+   --------------------------------------------------------- */
+
+/* Anchor every KPI navigation control to the exact vertical centre
+   of its card and keep the same right-hand spacing. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+    position: absolute !important;
+    inset: 50% 14px auto auto !important;
+    transform: translateY(-50%) !important;
+
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 220 !important;
+}
+
+/* Dark premium circle with a crisp white treatment. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page [data-testid^="stBaseButton"],
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page [data-testid^="stBaseButton"],
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page [data-testid^="stBaseButton"] {
+    width: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+
+    margin: 0 !important;
+    padding: 0 0 2px 0 !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,255,255,0.24) !important;
+
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,0.075), transparent 46%),
+        linear-gradient(180deg, rgba(24,24,24,0.99), rgba(8,8,8,1)) !important;
+
+    color: #FFFFFF !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        0 0 0 1px rgba(255,255,255,0.018),
+        0 0 10px rgba(255,255,255,0.055),
+        0 6px 16px rgba(0,0,0,0.34) !important;
+
+    cursor: pointer !important;
+}
+
+/* Remove the older amber inner ring. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button::before,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button::before,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button::before {
+    border-color: rgba(255,255,255,0.055) !important;
+}
+
+/* White arrow glyph. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button p,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button *,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button *,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button * {
+    color: #FFFFFF !important;
+}
+
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button p {
+    font-size: 1.48rem !important;
+    font-weight: 620 !important;
+    line-height: 1 !important;
+    text-shadow:
+        0 0 4px rgba(255,255,255,0.22),
+        0 0 9px rgba(255,255,255,0.08) !important;
+    transform: translate(-0.5px, -1px) !important;
+}
+
+/* Clean white hover — no amber recolouring. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:hover,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:hover,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:hover,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:focus-visible,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:focus-visible,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:focus-visible {
+    transform: translateY(-1px) !important;
+    border-color: rgba(255,255,255,0.48) !important;
+
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,0.12), transparent 48%),
+        linear-gradient(180deg, rgba(32,32,32,0.99), rgba(11,11,11,1)) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.12),
+        0 0 13px rgba(255,255,255,0.11),
+        0 8px 18px rgba(0,0,0,0.38) !important;
+}
+
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:hover p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:hover p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:hover p,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:focus-visible p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:focus-visible p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:focus-visible p {
+    color: #FFFFFF !important;
+    transform: translate(1px, -1px) !important;
+}
+
+/* ---------------------------------------------------------
+   2) HOME — LATEST TRANSFER ROWS
+   --------------------------------------------------------- */
+
+/* Exact centre-right placement instead of lower-right. */
+.home-transfer-detail-button,
+.home-transfer-detail-button:visited,
+.home-transfer-detail-button:hover,
+.home-transfer-detail-button:active {
+    top: 50% !important;
+    right: 12px !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+
+    transform: translateY(-50%) !important;
+
+    border: 1px solid rgba(255,255,255,0.22) !important;
+
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,0.070), transparent 48%),
+        linear-gradient(180deg, rgba(23,23,23,0.99), rgba(8,8,8,1)) !important;
+
+    color: #FFFFFF !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.07),
+        0 0 9px rgba(255,255,255,0.045),
+        0 5px 14px rgba(0,0,0,0.32) !important;
+}
+
+.home-transfer-detail-button::before {
+    border-color: rgba(255,255,255,0.05) !important;
+}
+
+.home-transfer-detail-arrow {
+    color: #FFFFFF !important;
+    font-size: 1.30rem !important;
+    font-weight: 620 !important;
+
+    text-shadow:
+        0 0 4px rgba(255,255,255,0.20),
+        0 0 8px rgba(255,255,255,0.07) !important;
+
+    transform: translate(-0.5px, -1px) !important;
+}
+
+.home-transfer-detail-button:hover,
+.home-transfer-detail-button:focus-visible {
+    transform: translateY(-50%) translateY(-1px) !important;
+    border-color: rgba(255,255,255,0.46) !important;
+
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,0.12), transparent 48%),
+        linear-gradient(180deg, rgba(31,31,31,0.99), rgba(11,11,11,1)) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.11),
+        0 0 12px rgba(255,255,255,0.095),
+        0 7px 17px rgba(0,0,0,0.37) !important;
+}
+
+.home-transfer-detail-button:hover .home-transfer-detail-arrow,
+.home-transfer-detail-button:focus-visible .home-transfer-detail-arrow {
+    color: #FFFFFF !important;
+    transform: translate(1px, -1px) !important;
+}
+
+.home-transfer-detail-button:active {
+    transform: translateY(-50%) scale(0.96) !important;
+}
+
+/* ---------------------------------------------------------
+   3) FULL ALERTS + FULL TRANSFERS LISTS
+   --------------------------------------------------------- */
+
+.full-list-detail-button,
+.full-list-detail-button:visited,
+.full-list-detail-button:hover,
+.full-list-detail-button:active {
+    top: 50% !important;
+    right: 16px !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+
+    transform: translateY(-50%) !important;
+
+    border: 1px solid rgba(255,255,255,0.23) !important;
+
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,0.075), transparent 48%),
+        linear-gradient(180deg, rgba(24,24,24,0.99), rgba(8,8,8,1)) !important;
+
+    color: #FFFFFF !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.075),
+        0 0 10px rgba(255,255,255,0.05),
+        0 6px 15px rgba(0,0,0,0.33) !important;
+}
+
+.full-list-detail-button::before {
+    border-color: rgba(255,255,255,0.05) !important;
+}
+
+.full-list-detail-arrow {
+    color: #FFFFFF !important;
+    font-size: 1.40rem !important;
+    font-weight: 620 !important;
+
+    text-shadow:
+        0 0 4px rgba(255,255,255,0.20),
+        0 0 8px rgba(255,255,255,0.07) !important;
+
+    transform: translate(-0.5px, -1px) !important;
+}
+
+.full-list-detail-button:hover,
+.full-list-detail-button:focus-visible {
+    transform: translateY(-50%) translateY(-1px) !important;
+    border-color: rgba(255,255,255,0.48) !important;
+
+    background:
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,0.12), transparent 48%),
+        linear-gradient(180deg, rgba(32,32,32,0.99), rgba(11,11,11,1)) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.11),
+        0 0 13px rgba(255,255,255,0.10),
+        0 8px 18px rgba(0,0,0,0.38) !important;
+}
+
+.full-list-detail-button:hover .full-list-detail-arrow,
+.full-list-detail-button:focus-visible .full-list-detail-arrow {
+    color: #FFFFFF !important;
+    transform: translate(1px, -1px) !important;
+}
+
+.full-list-detail-button:active {
+    transform: translateY(-50%) scale(0.96) !important;
+}
+
+/* ---------------------------------------------------------
+   Responsive consistency
+   --------------------------------------------------------- */
+@media (max-width: 1200px) {
+    .st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+    .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+    .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+        inset: 50% 12px auto auto !important;
+        transform: translateY(-50%) !important;
+    }
+
+    .home-transfer-detail-button,
+    .home-transfer-detail-button:visited,
+    .home-transfer-detail-button:hover,
+    .home-transfer-detail-button:active {
+        top: 50% !important;
+        right: 10px !important;
+        bottom: auto !important;
+        transform: translateY(-50%) !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
