@@ -11315,6 +11315,62 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
     }
 }
 
+
+/* =========================================================
+   HOME LOWER SECTION — ALIGN CARD BASES
+   ========================================================= */
+
+/*
+   The right side contains two stacked cards (Timeline + Market News),
+   while the left side contains one Latest Transfers card. Their fixed
+   pixel heights plus Streamlit's internal vertical gap were producing
+   slightly different total heights.
+
+   Let the right stack determine the row height, then stretch the
+   Latest Transfers card to exactly fill the left column. This keeps
+   both bottom edges aligned even if Streamlit changes the internal gap.
+*/
+[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel) {
+    align-items: stretch !important;
+}
+
+/* Make both lower-home columns participate in the same full row height. */
+[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel)
+    > [data-testid="stColumn"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-self: stretch !important;
+}
+
+/* Allow each column's inner vertical block to fill the stretched column. */
+[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel)
+    > [data-testid="stColumn"]
+    > [data-testid="stVerticalBlock"] {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+}
+
+/* Left card fills exactly to the base of the Timeline + News stack. */
+.st-key-home_alerts_panel {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Keep the right-hand cards at their designed sizes. */
+.st-key-home_timeline_card {
+    height: 380px !important;
+    min-height: 380px !important;
+    flex: 0 0 380px !important;
+}
+
+.st-key-home_news_preview_card {
+    height: 248px !important;
+    min-height: 248px !important;
+    flex: 0 0 248px !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
