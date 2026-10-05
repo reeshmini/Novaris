@@ -11116,6 +11116,34 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   HEADER — REMOVE BACKGROUND HORIZONTAL LINES
+   ========================================================= */
+
+/*
+   These lines came from older sticky-header styling that added
+   a gold border-bottom and shadow to the NOVARIS header wrappers.
+   Keep the navbar/card styling unchanged, but remove those
+   full-width background separators.
+*/
+.st-key-brand_header,
+div[data-testid="stVerticalBlock"] > div:has(.brand-title),
+div[data-testid="stElementContainer"]:has(.brand-title) {
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* Ensure nested Streamlit header wrappers do not introduce
+   their own visible separator line. */
+.st-key-brand_header > div,
+.st-key-brand_header [data-testid="stVerticalBlock"],
+.st-key-brand_header [data-testid="stElementContainer"] {
+    border-top: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
