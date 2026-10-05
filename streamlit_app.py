@@ -10413,6 +10413,221 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   NEWS — MAKE 24H MARKET SENTIMENT CARD MORE DISTINCT
+   ========================================================= */
+
+/*
+   The sentiment block is a market overview, not a normal article.
+   Give it a stronger visual hierarchy so it reads as a featured
+   market-insight panel above the news feed.
+*/
+.news-monitor-panel .news-summary-card {
+    position: relative !important;
+    overflow: hidden !important;
+
+    margin: 0 0 20px 0 !important;
+    padding: 22px 24px 21px 24px !important;
+
+    border-radius: 18px !important;
+    border: 1px solid rgba(255,190,66,0.42) !important;
+
+    background:
+        radial-gradient(
+            circle at 8% 0%,
+            rgba(255,184,40,0.16),
+            transparent 36%
+        ),
+        radial-gradient(
+            circle at 92% 15%,
+            rgba(255,213,115,0.055),
+            transparent 32%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(29,23,12,0.99) 0%,
+            rgba(14,13,11,0.995) 48%,
+            rgba(7,7,7,1) 100%
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,240,204,0.08),
+        inset 4px 0 0 rgba(255,178,30,0.88),
+        0 0 0 1px rgba(255,178,30,0.025),
+        0 0 22px rgba(255,178,30,0.12),
+        0 12px 28px rgba(0,0,0,0.34) !important;
+}
+
+/* Soft highlight across the top to distinguish the market-insight block. */
+.news-monitor-panel .news-summary-card::after {
+    content: "" !important;
+
+    position: absolute !important;
+    top: 0 !important;
+    left: 5% !important;
+    right: 5% !important;
+
+    height: 1px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,205,94,0.82),
+            transparent
+        ) !important;
+
+    box-shadow: 0 0 12px rgba(255,178,30,0.20) !important;
+    pointer-events: none !important;
+}
+
+/* Turn the top sentiment line into a proper feature header. */
+.news-monitor-panel .news-summary-top {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+
+    margin-bottom: 17px !important;
+    padding-bottom: 13px !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.075) !important;
+}
+
+.news-monitor-panel .news-summary-label {
+    position: relative !important;
+
+    color: #D8C59A !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+}
+
+/* Add a small "market pulse" cue without changing Python markup. */
+.news-monitor-panel .news-summary-label::before {
+    content: "MARKET PULSE" !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+
+    margin-right: 10px !important;
+    padding: 4px 7px !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,178,30,0.25) !important;
+
+    background: rgba(255,178,30,0.07) !important;
+    color: #F2D792 !important;
+
+    font-size: 0.60rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.10em !important;
+}
+
+/* Sentiment itself becomes a clearly separated pill. */
+.news-monitor-panel .news-summary-value {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+
+    padding: 7px 11px !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,205,92,0.24) !important;
+
+    background: rgba(255,178,30,0.065) !important;
+
+    font-size: 0.78rem !important;
+    font-weight: 850 !important;
+}
+
+/* Featured headline gets more hierarchy than standard article titles. */
+.news-monitor-panel .news-feature-title {
+    display: inline-block !important;
+
+    margin-bottom: 9px !important;
+
+    color: #FFF9EE !important;
+    font-size: 1.18rem !important;
+    font-weight: 850 !important;
+    line-height: 1.30 !important;
+    letter-spacing: -0.012em !important;
+
+    text-decoration: none !important;
+
+    transition:
+        color 0.16s ease,
+        text-shadow 0.16s ease !important;
+}
+
+.news-monitor-panel .news-feature-title:hover {
+    color: #FFD978 !important;
+    text-shadow: 0 0 10px rgba(255,178,30,0.14) !important;
+}
+
+/* Slightly calmer supporting text. */
+.news-monitor-panel .news-feature-description {
+    max-width: 96% !important;
+
+    color: #D5D0C7 !important;
+    font-size: 0.83rem !important;
+    line-height: 1.55 !important;
+}
+
+/* Source / age footer is separated from the story copy. */
+.news-monitor-panel .news-feature-meta {
+    margin-top: 15px !important;
+    padding-top: 12px !important;
+
+    border-top: 1px solid rgba(255,255,255,0.055) !important;
+
+    color: #918A80 !important;
+    font-size: 0.70rem !important;
+    font-weight: 700 !important;
+}
+
+/* The market-insight card should not behave exactly like article cards. */
+.news-monitor-panel .news-summary-card:hover {
+    transform: translateY(-2px) !important;
+
+    border-color: rgba(255,205,92,0.56) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,240,204,0.10),
+        inset 4px 0 0 rgba(255,190,48,0.96),
+        0 0 0 1px rgba(255,178,30,0.035),
+        0 0 28px rgba(255,178,30,0.15),
+        0 15px 32px rgba(0,0,0,0.38) !important;
+}
+
+/* Give the article list a little more visual separation from the summary. */
+.news-monitor-list {
+    position: relative !important;
+    padding-top: 2px !important;
+}
+
+@media (max-width: 900px) {
+    .news-monitor-panel .news-summary-card {
+        padding: 18px 17px !important;
+    }
+
+    .news-monitor-panel .news-summary-top {
+        align-items: flex-start !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .news-monitor-panel .news-summary-label::before {
+        display: none !important;
+    }
+
+    .news-monitor-panel .news-feature-title {
+        font-size: 1.02rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
