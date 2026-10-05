@@ -8815,6 +8815,97 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   TOP KPI ARROWS — FINAL VERTICAL CENTRING FIX
+   ========================================================= */
+
+/*
+   The Streamlit button wrapper sits a few pixels above the optical centre
+   of the KPI card. Move the whole control down slightly so the circular
+   button is visually centred within all three cards.
+*/
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+    top: calc(50% + 6px) !important;
+    right: 14px !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: translateY(-50%) !important;
+
+    width: 42px !important;
+    height: 42px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Keep the actual button perfectly centred within its wrapper. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page .stButton,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page .stButton,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page .stButton,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page [data-testid="stButton"],
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page [data-testid="stButton"],
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page [data-testid="stButton"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 42px !important;
+    height: 42px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Do not let paragraph line-height make the arrow appear high inside the circle. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button p {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    line-height: 1 !important;
+    transform: translate(0, -1px) !important;
+}
+
+/* Hover movement stays horizontal only; no vertical drift. */
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:hover,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:hover,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:hover,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:focus-visible,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:focus-visible,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:focus-visible {
+    transform: none !important;
+}
+
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:hover p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:hover p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:hover p,
+.st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page button:focus-visible p,
+.st-key-eth_market_kpi_clickable .st-key-open_eth_market_page button:focus-visible p,
+.st-key-btc_market_kpi_clickable .st-key-open_btc_market_page button:focus-visible p {
+    transform: translate(1px, -1px) !important;
+}
+
+@media (max-width: 1200px) {
+    .st-key-whale_alerts_kpi_clickable .st-key-open_whale_alerts_page,
+    .st-key-eth_market_kpi_clickable .st-key-open_eth_market_page,
+    .st-key-btc_market_kpi_clickable .st-key-open_btc_market_page {
+        top: calc(50% + 5px) !important;
+        right: 12px !important;
+        transform: translateY(-50%) !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
