@@ -11230,6 +11230,91 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
     transform: none !important;
 }
 
+
+/* =========================================================
+   HEADER — EXACT LIVE FEED / SETTINGS VERTICAL ALIGNMENT
+   ========================================================= */
+
+/*
+   Streamlit places the Live Feed HTML inside its own element wrapper.
+   Position THAT wrapper on the same coordinate system as the Settings
+   button, instead of only positioning the inner .brand-live-status.
+*/
+.st-key-brand_header [data-testid="stElementContainer"]:has(.brand-live-status) {
+    position: absolute !important;
+    top: 0.43rem !important;
+    right: 4.55rem !important;
+    z-index: 10035 !important;
+
+    width: auto !important;
+    height: 44px !important;
+    min-height: 44px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+/* The inner status no longer needs its own absolute offset. */
+.st-key-brand_header .brand-live-status {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+
+    height: 44px !important;
+    min-height: 44px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 7px !important;
+
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+/* Centre both pieces of wording on the gear button's horizontal axis. */
+.st-key-brand_header .brand-live-status > span:not(.brand-live-dot) {
+    height: auto !important;
+    min-height: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    line-height: 1 !important;
+    transform: none !important;
+}
+
+/* Centre the green status dot on exactly the same axis. */
+.st-key-brand_header .brand-live-status > .brand-live-dot {
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    align-self: center !important;
+    transform: none !important;
+}
+
+/* Preserve existing responsive behaviour. */
+@media (max-width: 1050px) {
+    .st-key-brand_header [data-testid="stElementContainer"]:has(.brand-live-status) {
+        display: none !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
