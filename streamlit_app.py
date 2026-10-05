@@ -9581,6 +9581,171 @@ information icon. This preserves both full-card navigation and tooltip hover.
     display: none !important;
 }
 
+
+/* =========================================================
+   WHALE PAGE — PUBLIC ADDRESS LOOKUP STYLE
+   ========================================================= */
+
+/* Replace the standalone Whale Alerts heading with one cohesive panel. */
+.whale-monitor-panel {
+    position: relative !important;
+    width: var(--novaris-detail-page-width) !important;
+    max-width: 1280px !important;
+    box-sizing: border-box !important;
+
+    margin: 8px auto 28px auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    border: 1px solid rgba(255,178,30,0.30) !important;
+    border-radius: 20px !important;
+
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255,178,30,0.065), transparent 28%),
+        linear-gradient(180deg, rgba(12,12,12,0.995), rgba(5,5,5,1)) !important;
+
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.035),
+        0 0 16px rgba(255,178,30,0.09),
+        0 14px 34px rgba(0,0,0,0.36) !important;
+}
+
+/* Same restrained top accent as Public Address Lookup. */
+.whale-monitor-panel::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 18px !important;
+    right: 18px !important;
+    height: 2px !important;
+    z-index: 3 !important;
+
+    border-radius: 999px !important;
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,178,30,0.92),
+            transparent
+        ) !important;
+
+    box-shadow: 0 0 14px rgba(255,178,30,0.22) !important;
+}
+
+/* Header follows the Public Address Lookup topbar styling. */
+.whale-monitor-topbar {
+    min-height: 74px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    padding: 17px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,178,30,0.018) 46%,
+            rgba(255,255,255,0.006)
+        ) !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.065) !important;
+}
+
+.whale-monitor-kicker {
+    color: #F2D792 !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.13em !important;
+    text-transform: uppercase !important;
+}
+
+.whale-monitor-support {
+    margin-top: 5px !important;
+
+    color: #8F897F !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 560 !important;
+    line-height: 1.40 !important;
+}
+
+/* Alert rows now live inside the unified gold panel. */
+.whale-monitor-list {
+    padding: 18px 18px 6px 18px !important;
+}
+
+.whale-monitor-panel .full-alert-card-shell {
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 0 0 14px 0 !important;
+    padding: 0 !important;
+}
+
+.whale-monitor-panel .full-alert-card-shell:last-child {
+    margin-bottom: 12px !important;
+}
+
+/* Keep the cyan whale signal, but make the nested cards slightly flatter
+   so the outer panel remains the dominant visual container. */
+.whale-monitor-panel .alert-card {
+    border-radius: 16px !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(18,18,18,0.94),
+            rgba(8,8,8,0.985)
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.025),
+        0 7px 18px rgba(0,0,0,0.22) !important;
+}
+
+.whale-monitor-panel .alert-card.whale-card {
+    border-color: rgba(124,248,255,0.28) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.03),
+        0 0 14px rgba(124,248,255,0.075),
+        0 7px 18px rgba(0,0,0,0.22) !important;
+}
+
+.whale-monitor-empty {
+    padding: 24px 20px 26px 20px !important;
+
+    color: #8F897F !important;
+    font-size: 0.80rem !important;
+    font-weight: 560 !important;
+}
+
+/* The original large title is intentionally not shown on the whale page. */
+.whale-monitor-panel + .latest-alerts-title {
+    display: none !important;
+}
+
+@media (max-width: 1400px) {
+    .whale-monitor-panel {
+        max-width: 1180px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .whale-monitor-panel {
+        width: calc(100vw - 28px) !important;
+        max-width: none !important;
+    }
+
+    .whale-monitor-list {
+        padding: 14px 12px 4px 12px !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -12098,13 +12263,38 @@ def render_full_alerts_page(
     detail_kind: str = "transfer",
 ):
     """Render transfers using the standard NOVARIS transaction alert cards."""
-    st.markdown(
-        f"<div class='latest-alerts-title'>{html.escape(page_title)}</div>",
-        unsafe_allow_html=True,
-    )
+    is_whale_page = str(detail_kind).lower() == "whale"
+
+    # Latest Transfers keeps its existing page title.
+    # The Whale Alerts page intentionally has no standalone "Whale Alerts" heading.
+    if not is_whale_page:
+        st.markdown(
+            f"<div class='latest-alerts-title'>{html.escape(page_title)}</div>",
+            unsafe_allow_html=True,
+        )
 
     if all_alerts_df.empty:
-        st.info("No transactions found in the current scan window.")
+        if is_whale_page:
+            st.markdown(
+                """
+                <div class="whale-monitor-panel">
+                    <div class="whale-monitor-topbar">
+                        <div>
+                            <div class="whale-monitor-kicker">LARGE TRANSFER ACTIVITY</div>
+                            <div class="whale-monitor-support">
+                                Bitcoin and Ethereum transactions meeting the configured whale threshold.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="whale-monitor-empty">
+                        No qualifying large transfers found in the current monitoring window.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.info("No transactions found in the current scan window.")
         return
 
     display_df = (
@@ -12112,6 +12302,8 @@ def render_full_alerts_page(
         if max_items is None
         else all_alerts_df.head(max_items)
     )
+
+    card_html_parts = []
 
     for _, row in display_df.iterrows():
         meta = get_asset_meta(row["asset_symbol"], row["chain"])
@@ -12146,7 +12338,6 @@ def render_full_alerts_page(
         else:
             risk_badge = "badge-low"
 
-        marker = whale_marker(row["amount_usd"])
         whale_class = (
             "whale-card"
             if pd.notna(row["amount_usd"])
@@ -12156,7 +12347,7 @@ def render_full_alerts_page(
 
         tx_hash_value = str(row.get("tx_hash") or "").strip()
         safe_tx_hash = html.escape(tx_hash_value, quote=True)
-        safe_detail_kind = "whale" if str(detail_kind).lower() == "whale" else "transfer"
+        safe_detail_kind = "whale" if is_whale_page else "transfer"
         alert_href = (
             f"?tx={safe_tx_hash}&detail={safe_detail_kind}"
             if tx_hash_value
@@ -12173,7 +12364,7 @@ def render_full_alerts_page(
             else ""
         )
 
-        st.markdown(
+        card_html_parts.append(
             f"""
             <div class="full-alert-card-shell">
                 <div class="alert-card {whale_class}">
@@ -12181,7 +12372,10 @@ def render_full_alerts_page(
                         <div class="alert-left">
                             <div class="asset-circle">{get_alert_asset_icon(row['asset_symbol'], row['chain'])}</div>
                             <div class="alert-content">
-                                <div class="alert-title"><span class="alert-amount">{amount_txt}</span><span class="alert-usd">{usd_txt}</span></div>
+                                <div class="alert-title">
+                                    <span class="alert-amount">{amount_txt}</span>
+                                    <span class="alert-usd">{usd_txt}</span>
+                                </div>
                                 <div class="alert-sub">{line2}</div>
                                 <div class="alert-badges">
                                     <span class="badge {chain_badge}">{row['chain']}</span>
@@ -12195,9 +12389,32 @@ def render_full_alerts_page(
                     {detail_button_html}
                 </div>
             </div>
-            """,
+            """
+        )
+
+    cards_html = "".join(card_html_parts)
+
+    if is_whale_page:
+        st.markdown(
+            (
+                '<div class="whale-monitor-panel">'
+                '<div class="whale-monitor-topbar">'
+                '<div>'
+                '<div class="whale-monitor-kicker">LARGE TRANSFER ACTIVITY</div>'
+                '<div class="whale-monitor-support">'
+                'Bitcoin and Ethereum transactions meeting the configured whale threshold.'
+                '</div>'
+                '</div>'
+                '</div>'
+                '<div class="whale-monitor-list">'
+                f'{cards_html}'
+                '</div>'
+                '</div>'
+            ),
             unsafe_allow_html=True,
         )
+    else:
+        st.markdown(cards_html, unsafe_allow_html=True)
 
 
 # =========================================================
