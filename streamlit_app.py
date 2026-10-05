@@ -3412,11 +3412,13 @@ hr {
 
 
 /* Exact lower-home alignment.
-   380px timeline + 12px gap + 248px news = 640px,
-   matching the 640px Latest Alerts panel. */
+   Streamlit's vertical spacing between the right-side cards is ~32px:
+   380px timeline + 32px gap + 248px news = 660px.
+   Match Latest Transfers to that total height without changing
+   the individual transfer-row layout. */
 .st-key-home_alerts_panel {
-    height: 640px !important;
-    min-height: 640px !important;
+    height: 660px !important;
+    min-height: 660px !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
 }
@@ -11313,184 +11315,6 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
     .st-key-brand_header [data-testid="stElementContainer"]:has(.brand-live-status) {
         display: none !important;
     }
-}
-
-
-/* =========================================================
-   HOME LOWER SECTION — ALIGN CARD BASES
-   ========================================================= */
-
-/*
-   The right side contains two stacked cards (Timeline + Market News),
-   while the left side contains one Latest Transfers card. Their fixed
-   pixel heights plus Streamlit's internal vertical gap were producing
-   slightly different total heights.
-
-   Let the right stack determine the row height, then stretch the
-   Latest Transfers card to exactly fill the left column. This keeps
-   both bottom edges aligned even if Streamlit changes the internal gap.
-*/
-[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel) {
-    align-items: stretch !important;
-}
-
-/* Make both lower-home columns participate in the same full row height. */
-[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel)
-    > [data-testid="stColumn"] {
-    display: flex !important;
-    flex-direction: column !important;
-    align-self: stretch !important;
-}
-
-/* Allow each column's inner vertical block to fill the stretched column. */
-[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel)
-    > [data-testid="stColumn"]
-    > [data-testid="stVerticalBlock"] {
-    flex: 1 1 auto !important;
-    height: 100% !important;
-}
-
-/* Left card fills exactly to the base of the Timeline + News stack. */
-.st-key-home_alerts_panel {
-    flex: 1 1 auto !important;
-    height: 100% !important;
-    min-height: 0 !important;
-    box-sizing: border-box !important;
-}
-
-/* Keep the right-hand cards at their designed sizes. */
-.st-key-home_timeline_card {
-    height: 380px !important;
-    min-height: 380px !important;
-    flex: 0 0 380px !important;
-}
-
-.st-key-home_news_preview_card {
-    height: 248px !important;
-    min-height: 248px !important;
-    flex: 0 0 248px !important;
-}
-
-
-/* =========================================================
-   HOME LOWER SECTION — STRETCH LATEST TRANSFERS TO NEWS BASE
-   ========================================================= */
-
-/*
-   The right column is naturally taller because it contains both
-   Transaction Timeline and Market News. Stretch the LEFT column to
-   that same natural height, then let the four Latest Transfers rows
-   share the remaining vertical space evenly.
-*/
-
-/* Both columns in the lower-home row share the tallest column height. */
-[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel) {
-    align-items: stretch !important;
-}
-
-/* Make each Streamlit column a stretchable flex column. */
-[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel)
-    > [data-testid="stColumn"] {
-    display: flex !important;
-    flex-direction: column !important;
-    align-self: stretch !important;
-}
-
-/* Allow the column's internal vertical wrapper to consume full height. */
-[data-testid="stHorizontalBlock"]:has(.st-key-home_alerts_panel)
-    > [data-testid="stColumn"]
-    > [data-testid="stVerticalBlock"] {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 auto !important;
-    height: 100% !important;
-}
-
-/* Latest Transfers outer card fills the complete left-column height. */
-.st-key-home_alerts_panel {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 auto !important;
-
-    height: auto !important;
-    min-height: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* Stretch the actual bordered Streamlit container, not only its key wrapper. */
-.st-key-home_alerts_panel > [data-testid="stVerticalBlockBorderWrapper"],
-.st-key-home_alerts_panel [data-testid="stVerticalBlockBorderWrapper"] {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 auto !important;
-
-    height: 100% !important;
-    min-height: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* The content stack inside Latest Transfers fills the bordered card. */
-.st-key-home_alerts_panel [data-testid="stVerticalBlock"] {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 auto !important;
-
-    height: 100% !important;
-    min-height: 0 !important;
-}
-
-/*
-   Each transaction row is rendered by its own st.markdown element.
-   Let the four row-elements grow equally so the final row ends at the
-   same baseline as the Market News card.
-*/
-.st-key-home_alerts_panel
-    [data-testid="stElementContainer"]:has(.home-transfer-card-shell) {
-    display: flex !important;
-    flex: 1 1 0 !important;
-    min-height: 0 !important;
-}
-
-/* Carry the full available height through Streamlit's markdown wrappers. */
-.st-key-home_alerts_panel
-    [data-testid="stElementContainer"]:has(.home-transfer-card-shell)
-    [data-testid="stMarkdownContainer"],
-.st-key-home_alerts_panel
-    [data-testid="stElementContainer"]:has(.home-transfer-card-shell)
-    [data-testid="stMarkdown"] {
-    width: 100% !important;
-    height: 100% !important;
-}
-
-/* Each transfer shell and card fill its allocated quarter of the space. */
-.st-key-home_alerts_panel .home-transfer-card-shell {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 0 !important;
-}
-
-.st-key-home_alerts_panel .home-transfer-card-shell .alert-card {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 0 !important;
-
-    margin-bottom: 0 !important;
-    box-sizing: border-box !important;
-}
-
-/* Do not force the old fixed 640px height anymore. */
-.st-key-home_alerts_panel {
-    max-height: none !important;
-}
-
-/* Right cards retain their existing content-driven dimensions. */
-.st-key-home_timeline_card,
-.st-key-home_news_preview_card {
-    flex-shrink: 0 !important;
 }
 
 </style>
