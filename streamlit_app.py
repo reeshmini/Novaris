@@ -10187,6 +10187,232 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   NEWS PAGE — MATCH ALERTS / TRANSFERS / MARKET PANELS
+   ========================================================= */
+
+/* Legacy standalone news heading is no longer rendered. */
+.news-hero {
+    display: none !important;
+}
+
+/* Unified full-page panel. */
+.news-monitor-panel {
+    position: relative !important;
+
+    width: var(--novaris-detail-page-width) !important;
+    max-width: 1280px !important;
+    box-sizing: border-box !important;
+
+    margin: 8px auto 28px auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    border: 1px solid rgba(255,178,30,0.30) !important;
+    border-radius: 20px !important;
+
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255,178,30,0.065), transparent 28%),
+        linear-gradient(180deg, rgba(12,12,12,0.995), rgba(5,5,5,1)) !important;
+
+    box-shadow:
+        0 0 0 1px rgba(255,178,30,0.035),
+        0 0 16px rgba(255,178,30,0.09),
+        0 14px 34px rgba(0,0,0,0.36) !important;
+}
+
+/* Same amber accent used by the other full-page panels. */
+.news-monitor-panel::before {
+    content: "" !important;
+
+    position: absolute !important;
+    top: 0 !important;
+    left: 18px !important;
+    right: 18px !important;
+    z-index: 3 !important;
+
+    height: 2px !important;
+    border-radius: 999px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,178,30,0.92),
+            transparent
+        ) !important;
+
+    box-shadow: 0 0 14px rgba(255,178,30,0.22) !important;
+}
+
+/* Compact header — same typography as the other pages. */
+.news-monitor-topbar {
+    min-height: 74px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    padding: 17px 20px !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,178,30,0.055),
+            rgba(255,178,30,0.018) 46%,
+            rgba(255,255,255,0.006)
+        ) !important;
+
+    border-bottom: 1px solid rgba(255,255,255,0.065) !important;
+}
+
+.news-monitor-kicker {
+    color: #F2D792 !important;
+
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.13em !important;
+    text-transform: uppercase !important;
+}
+
+.news-monitor-support {
+    margin-top: 5px !important;
+
+    color: #8F897F !important;
+
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 560 !important;
+    line-height: 1.40 !important;
+}
+
+.news-monitor-content {
+    padding: 18px !important;
+}
+
+/* Summary becomes an inner feature card instead of a second outer page card. */
+.news-monitor-panel .news-summary-card {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+
+    margin: 0 0 16px 0 !important;
+
+    border-radius: 16px !important;
+    border: 1px solid rgba(255,178,30,0.18) !important;
+
+    background:
+        radial-gradient(circle at top left, rgba(255,178,30,0.065), transparent 35%),
+        linear-gradient(180deg, rgba(17,17,17,0.96), rgba(8,8,8,0.99)) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.025),
+        0 7px 18px rgba(0,0,0,0.20) !important;
+}
+
+/* Do not duplicate the panel's top glow on the summary card. */
+.news-monitor-panel .news-summary-card::before {
+    display: none !important;
+}
+
+.news-monitor-list {
+    width: 100% !important;
+}
+
+/* News cards now fit the panel exactly. */
+.news-monitor-panel .news-story-card-wrap {
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 0 0 14px 0 !important;
+
+    perspective: 1000px !important;
+}
+
+.news-monitor-panel .news-story-card-wrap:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Keep the established news design but harmonize the corner radius. */
+.news-monitor-panel .news-story-card {
+    border-radius: 16px !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(18,18,18,0.96),
+            rgba(8,8,8,0.99)
+        ) !important;
+
+    transform: translateY(0) scale(1) !important;
+
+    transition:
+        transform 0.20s ease,
+        border-color 0.20s ease,
+        box-shadow 0.20s ease,
+        background 0.20s ease !important;
+}
+
+/* Same subtle 3D lift used across the redesigned pages. */
+.news-monitor-panel .news-story-card-wrap:hover .news-story-card {
+    transform: translateY(-4px) scale(1.004) !important;
+
+    border-color: rgba(255,255,255,0.38) !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(23,23,23,0.98),
+            rgba(9,9,9,0.995)
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.055),
+        0 0 15px rgba(255,255,255,0.07),
+        0 14px 28px rgba(0,0,0,0.40) !important;
+}
+
+.news-monitor-empty {
+    padding: 24px 20px 26px 20px !important;
+}
+
+.news-monitor-empty .news-empty-title {
+    color: #F5F1E9 !important;
+    font-size: 0.90rem !important;
+    font-weight: 800 !important;
+}
+
+.news-monitor-empty .news-empty-copy {
+    margin-top: 6px !important;
+    color: #8F897F !important;
+    font-size: 0.78rem !important;
+    line-height: 1.45 !important;
+}
+
+@media (max-width: 1400px) {
+    .news-monitor-panel {
+        max-width: 1180px !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .news-monitor-panel {
+        width: calc(100vw - 28px) !important;
+        max-width: none !important;
+    }
+
+    .news-monitor-content {
+        padding: 14px 12px !important;
+    }
+
+    .news-monitor-panel .news-story-card-wrap:hover .news-story-card {
+        transform: translateY(-2px) scale(1.002) !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -12564,32 +12790,30 @@ def render_market_page(prices, market_df: pd.DataFrame):
 
 
 def render_news_feed(news_df: pd.DataFrame):
-    """Render a premium Whale-Alert-inspired blockchain news feed."""
-    st.markdown(
-        """
-        <div class="news-hero">
-            <div>
-                <div class="news-page-title">Latest Blockchain News</div>
-                <div class="news-page-subtitle">
-                    Live crypto-market headlines with lightweight sentiment analysis.
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    """Render the full blockchain news feed inside the standard NOVARIS page panel."""
+
+    panel_kicker = "BLOCKCHAIN NEWS FEED"
+    panel_support = "Live crypto-market headlines with lightweight sentiment analysis."
 
     if news_df.empty:
         st.markdown(
-            """
-            <div class="news-empty">
-                <div class="news-empty-title">News feed temporarily unavailable</div>
-                <div class="news-empty-copy">
-                    Novaris tried both GNews and the Google News RSS fallback.
-                    Check your internet connection or try a broader News Query.
-                </div>
-            </div>
-            """,
+            (
+                '<div class="news-monitor-panel">'
+                '<div class="news-monitor-topbar">'
+                '<div>'
+                f'<div class="news-monitor-kicker">{panel_kicker}</div>'
+                f'<div class="news-monitor-support">{panel_support}</div>'
+                '</div>'
+                '</div>'
+                '<div class="news-monitor-empty">'
+                '<div class="news-empty-title">News feed temporarily unavailable</div>'
+                '<div class="news-empty-copy">'
+                'NOVARIS tried both GNews and the Google News RSS fallback. '
+                'Check your internet connection or try a broader News Query.'
+                '</div>'
+                '</div>'
+                '</div>'
+            ),
             unsafe_allow_html=True,
         )
         return
@@ -12621,31 +12845,30 @@ def render_news_feed(news_df: pd.DataFrame):
     top_url = _safe_html(top_row.get("url") or "#")
     top_age = _safe_html(news_time_ago(top_row.get("published_at")))
 
-    st.markdown(
-        (
-            f'<div class="news-summary-card">'
-            f'<div class="news-summary-top">'
-            f'<div class="news-summary-label">24H MARKET SENTIMENT</div>'
-            f'<div class="news-summary-value {overall_class}">'
-            f'<span class="news-summary-icon">{overall_icon}</span> {overall_label}'
-            f'</div>'
-            f'</div>'
-            f'<a class="news-feature-title" href="{top_url}" target="_blank" '
-            f'rel="noopener noreferrer">{top_title} ↗</a>'
-            f'<div class="news-feature-description">{top_description}</div>'
-            f'<div class="news-feature-meta">'
-            f'<span>{top_source}</span>'
-            f'<span>{top_age}</span>'
-            f'</div>'
-            f'</div>'
-        ),
-        unsafe_allow_html=True,
+    summary_html = (
+        f'<div class="news-summary-card">'
+        f'<div class="news-summary-top">'
+        f'<div class="news-summary-label">24H MARKET SENTIMENT</div>'
+        f'<div class="news-summary-value {overall_class}">'
+        f'<span class="news-summary-icon">{overall_icon}</span> {overall_label}'
+        f'</div>'
+        f'</div>'
+        f'<a class="news-feature-title" href="{top_url}" target="_blank" '
+        f'rel="noopener noreferrer">{top_title} ↗</a>'
+        f'<div class="news-feature-description">{top_description}</div>'
+        f'<div class="news-feature-meta">'
+        f'<span>{top_source}</span>'
+        f'<span>{top_age}</span>'
+        f'</div>'
+        f'</div>'
     )
+
+    story_html_parts = []
 
     for _, article in news_df.iterrows():
         title = _safe_html(article.get("title") or "Untitled story")
         description = _safe_html(article.get("description") or "")
-        source = _safe_html(article.get("source") or "Unknown source")
+        source_name = _safe_html(article.get("source") or "Unknown source")
         url = _safe_html(article.get("url") or "#")
         age = _safe_html(news_time_ago(article.get("published_at")))
         sentiment = str(article.get("sentiment_label") or "Neutral")
@@ -12669,30 +12892,51 @@ def render_news_feed(news_df: pd.DataFrame):
             for tag in tags
         )
 
-        card_html = (
-            f'<div class="news-story-card-wrap">'
-            f'<div class="news-story-card">'
-            f'<a class="news-story-hitbox" href="{url}" target="_blank" '
-            f'rel="noopener noreferrer" aria-label="Open news article"></a>'
-            f'<div class="news-story-main">'
-            f'<div class="news-story-icon {sentiment_class}">{sentiment_icon}</div>'
-            f'<div class="news-story-content">'
-            f'<div class="news-story-title">{title} ↗</div>'
-            f'<div class="news-story-source">via {source}</div>'
-            f'<div class="news-story-description">{description}</div>'
-            f'<div class="news-story-tags">{tag_html}</div>'
-            f'</div>'
-            f'<div class="news-story-side">'
-            f'<div class="news-story-time">{age}</div>'
-            f'<div class="news-story-sentiment {sentiment_class}">'
-            f'{sentiment_icon} {sentiment}'
-            f'</div>'
-            f'</div>'
-            f'</div>'
-            f'</div>'
-            f'</div>'
+        story_html_parts.append(
+            (
+                f'<div class="news-story-card-wrap">'
+                f'<div class="news-story-card">'
+                f'<a class="news-story-hitbox" href="{url}" target="_blank" '
+                f'rel="noopener noreferrer" aria-label="Open news article"></a>'
+                f'<div class="news-story-main">'
+                f'<div class="news-story-icon {sentiment_class}">{sentiment_icon}</div>'
+                f'<div class="news-story-content">'
+                f'<div class="news-story-title">{title} ↗</div>'
+                f'<div class="news-story-source">via {source_name}</div>'
+                f'<div class="news-story-description">{description}</div>'
+                f'<div class="news-story-tags">{tag_html}</div>'
+                f'</div>'
+                f'<div class="news-story-side">'
+                f'<div class="news-story-time">{age}</div>'
+                f'<div class="news-story-sentiment {sentiment_class}">'
+                f'{sentiment_icon} {sentiment}'
+                f'</div>'
+                f'</div>'
+                f'</div>'
+                f'</div>'
+                f'</div>'
+            )
         )
-        st.markdown(card_html, unsafe_allow_html=True)
+
+    st.markdown(
+        (
+            '<div class="news-monitor-panel">'
+            '<div class="news-monitor-topbar">'
+            '<div>'
+            f'<div class="news-monitor-kicker">{panel_kicker}</div>'
+            f'<div class="news-monitor-support">{panel_support}</div>'
+            '</div>'
+            '</div>'
+            '<div class="news-monitor-content">'
+            f'{summary_html}'
+            '<div class="news-monitor-list">'
+            f'{"".join(story_html_parts)}'
+            '</div>'
+            '</div>'
+            '</div>'
+        ),
+        unsafe_allow_html=True,
+    )
 
 
 
