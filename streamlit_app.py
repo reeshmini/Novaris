@@ -9746,6 +9746,76 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   WHALE ALERT CARDS — RESTORE PREMIUM 3D HOVER EFFECT
+   ========================================================= */
+
+/* Give each card a smooth lift / depth transition. */
+.whale-monitor-panel .full-alert-card-shell {
+    perspective: 1000px !important;
+}
+
+.whale-monitor-panel .alert-card {
+    transform: translateY(0) scale(1) !important;
+    transform-origin: center center !important;
+
+    transition:
+        transform 0.20s ease,
+        border-color 0.20s ease,
+        box-shadow 0.20s ease,
+        background 0.20s ease !important;
+
+    will-change: transform !important;
+}
+
+/* Premium 3D-style hover: slight lift, tiny scale and stronger depth. */
+.whale-monitor-panel .alert-card:hover {
+    transform: translateY(-4px) scale(1.006) !important;
+
+    border-color: rgba(126,248,255,0.46) !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(22,22,22,0.98),
+            rgba(8,8,8,0.995)
+        ) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.045),
+        0 0 0 1px rgba(126,248,255,0.025),
+        0 0 20px rgba(126,248,255,0.11),
+        0 14px 28px rgba(0,0,0,0.42) !important;
+}
+
+/* Whale cards get a slightly stronger cyan edge on hover. */
+.whale-monitor-panel .alert-card.whale-card:hover {
+    border-color: rgba(126,248,255,0.56) !important;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 0 0 1px rgba(126,248,255,0.035),
+        0 0 24px rgba(126,248,255,0.14),
+        0 15px 30px rgba(0,0,0,0.44) !important;
+}
+
+/* Keep the arrow button crisp while the parent card lifts. */
+.whale-monitor-panel .full-list-detail-button {
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease !important;
+}
+
+/* Avoid exaggerated motion on touch/mobile devices. */
+@media (max-width: 900px) {
+    .whale-monitor-panel .alert-card:hover {
+        transform: translateY(-2px) scale(1.002) !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
