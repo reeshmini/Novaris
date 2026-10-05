@@ -10957,6 +10957,56 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   HOME DASHBOARD HEADERS — WHITE TEXT + WHITE TOOLTIPS
+   Applies to:
+   - WHALE ALERTS
+   - ETHEREUM SPOT PRICE (USD)
+   - BITCOIN SPOT PRICE (USD)
+   - FEAR & GREED INDEX
+   - LATEST TRANSFERS
+   - TRANSACTION TIMELINE (USD VALUE)
+   - MARKET NEWS
+   ========================================================= */
+
+/* Top KPI labels */
+.metric-card.compact-kpi .metric-label {
+    color: #F5F1E9 !important;
+    text-shadow:
+        0 0 8px rgba(255,255,255,0.08),
+        0 0 14px rgba(255,255,255,0.03) !important;
+}
+
+/* Lower dashboard card titles */
+.home-alerts-title,
+.home-compact-title,
+.fg-index-title {
+    color: #F5F1E9 !important;
+    text-shadow:
+        0 0 8px rgba(255,255,255,0.08),
+        0 0 14px rgba(255,255,255,0.03) !important;
+}
+
+/* Tooltip icons next to those headers */
+.metric-card.compact-kpi .metric-info-tooltip,
+.home-alerts-title .metric-info-tooltip,
+.home-compact-title .metric-info-tooltip,
+.fg-index-title-row .metric-info-tooltip {
+    color: rgba(245, 241, 233, 0.92) !important;
+}
+
+.metric-card.compact-kpi .metric-info-tooltip:hover,
+.metric-card.compact-kpi .metric-info-tooltip:focus-visible,
+.home-alerts-title .metric-info-tooltip:hover,
+.home-alerts-title .metric-info-tooltip:focus-visible,
+.home-compact-title .metric-info-tooltip:hover,
+.home-compact-title .metric-info-tooltip:focus-visible,
+.fg-index-title-row .metric-info-tooltip:hover,
+.fg-index-title-row .metric-info-tooltip:focus-visible {
+    color: #FFFFFF !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
