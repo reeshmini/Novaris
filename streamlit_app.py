@@ -9535,6 +9535,21 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   WATCHLIST — HEADER REMOVED / CARD MOVED UP
+   ========================================================= */
+
+/* The Public Address Lookup card is now the first content element. */
+.st-key-watchlist_controls_card {
+    margin-top: 6px !important;
+}
+
+/* Old Wallet Lookup hero is no longer rendered. */
+.wallet-page-hero {
+    display: none !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -13152,21 +13167,6 @@ with main_col:
     # WATCHLIST — WALLET LOOKUP IN MAIN CONTENT AREA
     # -----------------------------------------------------
     if nav_view == "watchlist":
-        # Same page-header treatment as Crypto Market Prices.
-        st.markdown(
-            """
-            <div class="market-page-hero wallet-page-hero">
-                <div class="market-page-title">Wallet Lookup</div>
-                <div class="market-page-subtitle">
-                    Inspect recent on-chain activity for any Bitcoin or Ethereum wallet.
-                    Enter one or both public addresses and NOVARIS will surface recent
-                    transfers, direction, USD value and risk signals.
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
         with st.container(border=True, key="watchlist_controls_card"):
             st.markdown(
                 """
