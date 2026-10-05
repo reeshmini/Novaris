@@ -9550,6 +9550,37 @@ information icon. This preserves both full-card navigation and tooltip hover.
     display: none !important;
 }
 
+
+/* =========================================================
+   WATCHLIST — MATCH RESULTS HEADING TO PUBLIC ADDRESS LOOKUP
+   ========================================================= */
+
+/* Match PUBLIC ADDRESS LOOKUP exactly. */
+.wallet-results-title {
+    color: #F2D792 !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.13em !important;
+    text-transform: uppercase !important;
+}
+
+/* Keep subtitle aligned with the lookup-card support text. */
+.wallet-results-subtitle {
+    margin-top: 5px !important;
+    color: #8F897F !important;
+    font-size: 0.78rem !important;
+    font-weight: 560 !important;
+    line-height: 1.40 !important;
+}
+
+/* READ-ONLY chip has been removed from the markup. */
+.wallet-security-chip,
+.wallet-security-dot {
+    display: none !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -13177,10 +13208,6 @@ with main_col:
                             Enter a Bitcoin or Ethereum public address. NOVARIS only reads public on-chain data.
                         </div>
                     </div>
-                    <div class="wallet-security-chip">
-                        <span class="wallet-security-dot"></span>
-                        READ-ONLY
-                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -13687,7 +13714,7 @@ with main_col:
                     (
                         '<div class="wallet-results-header">'
                         '<div>'
-                        '<div class="wallet-results-title">Wallet Activity Results</div>'
+                        '<div class="wallet-results-title">WALLET ACTIVITY RESULTS</div>'
                         '<div class="wallet-results-subtitle">'
                         'Recent on-chain activity matching the wallet address search.'
                         '</div>'
