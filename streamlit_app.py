@@ -15548,7 +15548,7 @@ with main_col:
             timeline_tooltip = metric_tooltip_html(
                 "Visualises detected Bitcoin and Ethereum transactions over time based on "
                 "their estimated USD value. The default 1H view shows the latest completed "
-                "hours in Singapore time. Use 6H, 24H or 7D to expand the timeline."
+                "hours in Singapore time. Use 6H or 24H to expand the timeline."
             )
 
             st.markdown(
@@ -15564,7 +15564,7 @@ with main_col:
             # Load enough persisted history to support every timeline view.
             # PostgreSQL remains authoritative; watchlist results are overlaid
             # only for the current browser session.
-            db_timeline_df = load_db_timeline_history(days=30)
+            db_timeline_df = load_db_timeline_history(days=7)
 
             if db_timeline_df is None:
                 timeline_df = all_alerts_df.copy()
@@ -15615,9 +15615,6 @@ with main_col:
                 view_24h_start = current_hour - pd.Timedelta(days=7)
                 view_24h_end = completed_hour_end
 
-                view_7d_start = current_hour - pd.Timedelta(days=30)
-                view_7d_end = completed_hour_end
-
                 timeline_df["chain_source_type"] = (
                     timeline_df["chain"] + "_" + timeline_df["source_type"]
                 )
@@ -15644,68 +15641,63 @@ with main_col:
 
                 # Browser-side timeframe controls. These change the chart only;
                 # they do not rerun Streamlit or call the blockchain APIs.
-                timeline_buttons = [
-                    dict(
-                        label="1H",
-                        method="relayout",
-                        args=[
-                            {
-                                "xaxis.range": [
-                                    view_1h_start.to_pydatetime(),
-                                    view_1h_end.to_pydatetime(),
-                                ],
-                                "xaxis.dtick": 60 * 60 * 1000,
-                                "xaxis.tick0": view_1h_start.ceil("h").to_pydatetime(),
-                                "xaxis.tickformat": "%I %p",
-                            }
-                        ],
-                    ),
-                    dict(
-                        label="6H",
-                        method="relayout",
-                        args=[
-                            {
-                                "xaxis.range": [
-                                    view_6h_start.to_pydatetime(),
-                                    view_6h_end.to_pydatetime(),
-                                ],
-                                "xaxis.dtick": 6 * 60 * 60 * 1000,
-                                "xaxis.tick0": view_6h_start.ceil("6h").to_pydatetime(),
-                                "xaxis.tickformat": "%I %p<br>%b %d",
-                            }
-                        ],
-                    ),
-                    dict(
-                        label="24H",
-                        method="relayout",
-                        args=[
-                            {
-                                "xaxis.range": [
-                                    view_24h_start.to_pydatetime(),
-                                    view_24h_end.to_pydatetime(),
-                                ],
-                                "xaxis.dtick": 24 * 60 * 60 * 1000,
-                                "xaxis.tick0": view_24h_start.normalize().to_pydatetime(),
-                                "xaxis.tickformat": "%b %d",
-                            }
-                        ],
-                    ),
-                    dict(
-                        label="7D",
-                        method="relayout",
-                        args=[
-                            {
-                                "xaxis.range": [
-                                    view_7d_start.to_pydatetime(),
-                                    view_7d_end.to_pydatetime(),
-                                ],
-                                "xaxis.dtick": 7 * 24 * 60 * 60 * 1000,
-                                "xaxis.tick0": view_7d_start.normalize().to_pydatetime(),
-                                "xaxis.tickformat": "%b %d",
-                            }
-                        ],
-                    ),
-                ]
+                #
+                # Plotly's normal active button becomes bright white, which clashes
+                # with NOVARIS. Use three one-button menus instead and explicitly
+                # recolour them on click:
+                #   selected = muted amber
+                #   unselected = near-black
+                active_button_bg = "rgba(82,54,12,0.98)"
+                inactive_button_bg = "rgba(12,12,12,0.96)"
+                button_border = "rgba(255,178,30,0.30)"
+
+                one_hour_relayout = {
+                    "xaxis.range": [
+                        view_1h_start.to_pydatetime(),
+                        view_1h_end.to_pydatetime(),
+                    ],
+                    "xaxis.dtick": 60 * 60 * 1000,
+                    "xaxis.tick0": view_1h_start.ceil("h").to_pydatetime(),
+                    "xaxis.tickformat": "%I %p",
+                    "updatemenus[0].bgcolor": active_button_bg,
+                    "updatemenus[0].bordercolor": "rgba(255,190,70,0.62)",
+                    "updatemenus[1].bgcolor": inactive_button_bg,
+                    "updatemenus[1].bordercolor": button_border,
+                    "updatemenus[2].bgcolor": inactive_button_bg,
+                    "updatemenus[2].bordercolor": button_border,
+                }
+
+                six_hour_relayout = {
+                    "xaxis.range": [
+                        view_6h_start.to_pydatetime(),
+                        view_6h_end.to_pydatetime(),
+                    ],
+                    "xaxis.dtick": 6 * 60 * 60 * 1000,
+                    "xaxis.tick0": view_6h_start.ceil("6h").to_pydatetime(),
+                    "xaxis.tickformat": "%I %p<br>%b %d",
+                    "updatemenus[0].bgcolor": inactive_button_bg,
+                    "updatemenus[0].bordercolor": button_border,
+                    "updatemenus[1].bgcolor": active_button_bg,
+                    "updatemenus[1].bordercolor": "rgba(255,190,70,0.62)",
+                    "updatemenus[2].bgcolor": inactive_button_bg,
+                    "updatemenus[2].bordercolor": button_border,
+                }
+
+                twenty_four_hour_relayout = {
+                    "xaxis.range": [
+                        view_24h_start.to_pydatetime(),
+                        view_24h_end.to_pydatetime(),
+                    ],
+                    "xaxis.dtick": 24 * 60 * 60 * 1000,
+                    "xaxis.tick0": view_24h_start.normalize().to_pydatetime(),
+                    "xaxis.tickformat": "%b %d",
+                    "updatemenus[0].bgcolor": inactive_button_bg,
+                    "updatemenus[0].bordercolor": button_border,
+                    "updatemenus[1].bgcolor": inactive_button_bg,
+                    "updatemenus[1].bordercolor": button_border,
+                    "updatemenus[2].bgcolor": active_button_bg,
+                    "updatemenus[2].bordercolor": "rgba(255,190,70,0.62)",
+                }
 
                 fig1.update_layout(
                     height=320,
@@ -15741,26 +15733,84 @@ with main_col:
                         automargin=True,
                     ),
                     updatemenus=[
+                        # 1H — selected by default.
                         dict(
                             type="buttons",
                             direction="left",
-                            active=0,
-                            showactive=True,
-                            buttons=timeline_buttons,
-                            x=1.0,
+                            showactive=False,
+                            buttons=[
+                                dict(
+                                    label="1H",
+                                    method="relayout",
+                                    args=[one_hour_relayout],
+                                )
+                            ],
+                            x=0.902,
                             y=1.18,
-                            xanchor="right",
+                            xanchor="left",
                             yanchor="top",
                             pad=dict(r=0, t=0),
-                            bgcolor="rgba(12,12,12,0.96)",
-                            bordercolor="rgba(255,255,255,0.14)",
+                            bgcolor=active_button_bg,
+                            bordercolor="rgba(255,190,70,0.62)",
+                            borderwidth=1,
+                            font=dict(
+                                color="#FFF5DF",
+                                size=12,
+                                family='Inter, "Segoe UI", Arial, sans-serif',
+                            ),
+                        ),
+                        # 6H
+                        dict(
+                            type="buttons",
+                            direction="left",
+                            showactive=False,
+                            buttons=[
+                                dict(
+                                    label="6H",
+                                    method="relayout",
+                                    args=[six_hour_relayout],
+                                )
+                            ],
+                            x=0.936,
+                            y=1.18,
+                            xanchor="left",
+                            yanchor="top",
+                            pad=dict(r=0, t=0),
+                            bgcolor=inactive_button_bg,
+                            bordercolor=button_border,
                             borderwidth=1,
                             font=dict(
                                 color="#F4E8CB",
                                 size=12,
                                 family='Inter, "Segoe UI", Arial, sans-serif',
                             ),
-                        )
+                        ),
+                        # 24H
+                        dict(
+                            type="buttons",
+                            direction="left",
+                            showactive=False,
+                            buttons=[
+                                dict(
+                                    label="24H",
+                                    method="relayout",
+                                    args=[twenty_four_hour_relayout],
+                                )
+                            ],
+                            x=0.970,
+                            y=1.18,
+                            xanchor="left",
+                            yanchor="top",
+                            pad=dict(r=0, t=0),
+                            bgcolor=inactive_button_bg,
+                            bordercolor=button_border,
+                            borderwidth=1,
+                            font=dict(
+                                color="#F4E8CB",
+                                size=12,
+                                family='Inter, "Segoe UI", Arial, sans-serif',
+                            ),
+                        ),
                     ],
                     legend=dict(
                         title="",
