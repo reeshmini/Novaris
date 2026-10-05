@@ -14734,11 +14734,28 @@ VIEW_TO_NAV = {value: key for key, value in NAV_TO_VIEW.items()}
 
 
 def set_nav_view(view_name: str):
-    """Switch NOVARIS views without browser URL navigation."""
+    """Switch NOVARIS views and leave any transaction-detail route."""
     view_name = str(view_name or "home").lower()
 
     if view_name not in {"home", "alerts", "whales", "market", "watchlist", "news", "controls"}:
         view_name = "home"
+
+    # Detail pages are opened through URL query parameters such as:
+    #   ?tx=<transaction_hash>&detail=whale
+    #
+    # The transaction-detail router has priority over nav_view. Therefore,
+    # whenever the user clicks Home / Alerts / Transfers / Market / Watchlist /
+    # News / Settings, remove the detail parameters first. Otherwise the old
+    # tx parameter remains in the URL and the detail page is rendered again.
+    try:
+        if "tx" in st.query_params:
+            del st.query_params["tx"]
+        if "detail" in st.query_params:
+            del st.query_params["detail"]
+    except Exception:
+        # Navigation should still work even if query-param cleanup is unavailable
+        # on an older Streamlit build.
+        pass
 
     st.session_state.nav_view = view_name
     nav_label = VIEW_TO_NAV.get(view_name, NAV_OPTIONS[0])
