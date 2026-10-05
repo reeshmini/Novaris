@@ -11144,6 +11144,38 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
     box-shadow: none !important;
 }
 
+
+/* =========================================================
+   APP BACKGROUND — REMOVE GOLD / GREEN AMBIENT COLOUR
+   ========================================================= */
+
+/*
+   The broad brown/gold tint on the Market page comes from the
+   global .stApp radial-gradient background. Remove those coloured
+   ambient gradients so every page uses the same clean neutral
+   NOVARIS background.
+*/
+.stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewContainer"] > .main,
+[data-testid="stMain"] {
+    background:
+        linear-gradient(
+            180deg,
+            #050505 0%,
+            #070707 48%,
+            #090909 100%
+        ) !important;
+    background-color: #070707 !important;
+    background-image:
+        linear-gradient(
+            180deg,
+            #050505 0%,
+            #070707 48%,
+            #090909 100%
+        ) !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
