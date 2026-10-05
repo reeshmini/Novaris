@@ -10628,6 +10628,35 @@ information icon. This preserves both full-card navigation and tooltip hover.
     }
 }
 
+
+/* =========================================================
+   WHALE ALERTS HEADER — LARGER + WHITE
+   ========================================================= */
+
+.whale-monitor-kicker {
+    color: #F5F1E9 !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 1.20rem !important;
+    font-weight: 850 !important;
+    line-height: 1.18 !important;
+    letter-spacing: -0.01em !important;
+    text-transform: none !important;
+}
+
+.whale-monitor-support {
+    margin-top: 6px !important;
+    color: #9D968C !important;
+    font-size: 0.80rem !important;
+    font-weight: 560 !important;
+    line-height: 1.42 !important;
+}
+
+@media (max-width: 900px) {
+    .whale-monitor-kicker {
+        font-size: 1.04rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -13175,7 +13204,7 @@ def render_full_alerts_page(
     panel_empty_class = "whale-monitor-empty" if is_whale_page else "transfer-monitor-empty"
 
     if is_whale_page:
-        panel_kicker = "LARGE TRANSFER ACTIVITY"
+        panel_kicker = "Whale Alerts"
         panel_support = (
             "Bitcoin and Ethereum transactions meeting the configured whale threshold."
         )
