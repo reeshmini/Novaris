@@ -16169,18 +16169,3 @@ with main_col:
 
         st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
         render_home_news_preview(news_df)
-
-    # -----------------------------------------------------
-    # FOOTER
-    # -----------------------------------------------------
-    st.markdown(
-        '<div class="novaris-footer">'
-        '<div>✦ &nbsp; © 2026 NOVARIS. All rights reserved.</div>'
-        '<div class="novaris-footer-links">'
-        '<span>Privacy Policy</span>'
-        '<span>Terms of Service</span>'
-        '<span>Contact</span>'
-        '</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
