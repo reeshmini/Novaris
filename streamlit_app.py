@@ -11417,6 +11417,16 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
     opacity: 1 !important;
 }
 
+
+/* =========================================================
+   WATCHLIST — SEARCH DEPTH NOTE COLOUR
+   ========================================================= */
+
+.wallet-search-note {
+    color: #9D968C !important;
+    opacity: 1 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
