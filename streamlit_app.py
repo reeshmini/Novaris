@@ -11384,6 +11384,27 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
     min-height: 102px !important;
 }
 
+
+/* =========================================================
+   WATCHLIST EMPTY STATE — MATCH PUBLIC ADDRESS LOOKUP HEADER
+   ========================================================= */
+
+.wallet-empty-title {
+    color: #F5F1E9 !important;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 1.20rem !important;
+    font-weight: 850 !important;
+    line-height: 1.18 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+}
+
+@media (max-width: 900px) {
+    .wallet-empty-title {
+        font-size: 1.04rem !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
