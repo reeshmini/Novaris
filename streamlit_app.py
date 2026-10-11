@@ -13692,7 +13692,7 @@ def render_market_page(prices, market_df: pd.DataFrame):
         '<div>',
         '<div class="market-monitor-kicker">CRYPTO MARKET OVERVIEW</div>',
         '<div class="market-monitor-support">'
-        'Bitcoin and Ethereum spot prices with recent market movement.'
+        'Bitcoin and Ethereum spot prices with recent market movement'
         '</div>',
         '</div>',
         '</div>',
@@ -13802,7 +13802,7 @@ def render_market_page(prices, market_df: pd.DataFrame):
             '<span>DATA SOURCE</span>',
             '<strong>CoinGecko</strong>',
             '<span class="market-source-dot">•</span>',
-            '<span>24H change and recent sparkline are market-data estimates.</span>',
+            '<span>24H change and recent sparkline are market-data estimates</span>',
             '</div>',
             '</div>',
             '</div>',
@@ -13817,7 +13817,7 @@ def render_news_feed(news_df: pd.DataFrame):
     """Render the full blockchain news feed inside the standard NOVARIS page panel."""
 
     panel_kicker = "BLOCKCHAIN NEWS FEED"
-    panel_support = "Live crypto-market headlines with lightweight sentiment analysis."
+    panel_support = "Live crypto-market headlines with lightweight sentiment analysis"
 
     if news_df.empty:
         st.markdown(
@@ -13986,13 +13986,13 @@ def render_full_alerts_page(
     if is_whale_page:
         panel_kicker = "WHALE ALERTS"
         panel_support = (
-            "Bitcoin and Ethereum transactions meeting the configured whale threshold."
+            "Bitcoin and Ethereum transactions meeting the configured whale threshold"
         )
         empty_text = "No qualifying large transfers found in the current monitoring window."
     else:
         panel_kicker = "RECENT TRANSFER ACTIVITY"
         panel_support = (
-            "Most recent Bitcoin and Ethereum transfers indexed by NOVARIS."
+            "Most recent Bitcoin and Ethereum transfers indexed by NOVARIS"
         )
         empty_text = "No recent transfers found in the current monitoring window."
 
@@ -14709,7 +14709,7 @@ def render_monitoring_controls_page(prefs):
                 '</div>'
                 '<div class="settings-panel-support">'
                 'Configure how NOVARIS monitors blockchain activity, identifies '
-                'whale transfers and retrieves market-related news.'
+                'whale transfers and retrieves market-related news'
                 '</div>'
                 '</div>'
                 '</div>'
@@ -15152,7 +15152,7 @@ with main_col:
                     <div>
                         <div class="wallet-card-kicker">PUBLIC ADDRESS LOOKUP</div>
                         <div class="wallet-card-support">
-                            Enter a Bitcoin or Ethereum public address. NOVARIS only reads public on-chain data.
+                            Enter a Bitcoin or Ethereum public address NOVARIS only reads public on-chain data
                         </div>
                     </div>
                 </div>
@@ -15645,8 +15645,7 @@ with main_col:
                     <div>
                         <div class="wallet-empty-title">READY TO INSPECT WALLET ACTIVITY</div>
                         <div class="wallet-empty-copy">
-                            Enter a Bitcoin or Ethereum address above and run a search.
-                            Matching transfers and NOVARIS risk signals will appear here.
+                            Enter a Bitcoin or Ethereum address above and run a search Matching transfers and NOVARIS risk signals will appear here
                         </div>
                     </div>
                 </div>
