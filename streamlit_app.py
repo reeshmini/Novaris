@@ -14727,7 +14727,7 @@ def render_monitoring_controls_page(prefs):
                         <div class="settings-row-copy">
                             <div class="settings-row-title">ERC-20 Network Scan</div>
                             <div class="settings-row-description">
-                                Include ERC-20 token transfers when indexing Ethereum activity.
+                                Include ERC-20 token transfers when indexing Ethereum activity
                             </div>
                         </div>
                         """,
@@ -14749,7 +14749,7 @@ def render_monitoring_controls_page(prefs):
                         <div class="settings-row-copy">
                             <div class="settings-row-title">News Query</div>
                             <div class="settings-row-description">
-                                Keywords used to retrieve cryptocurrency and blockchain market news.
+                                Keywords used to retrieve cryptocurrency and blockchain market news
                             </div>
                         </div>
                         """,
@@ -14770,7 +14770,7 @@ def render_monitoring_controls_page(prefs):
                         <div class="settings-row-copy">
                             <div class="settings-row-title">Whale Threshold</div>
                             <div class="settings-row-description">
-                                Minimum USD transaction value required to classify a transfer as a whale alert.
+                                Minimum USD transaction value required to classify a transfer as a whale alert
                             </div>
                         </div>
                         """,
@@ -14793,7 +14793,7 @@ def render_monitoring_controls_page(prefs):
                         <div class="settings-row-copy">
                             <div class="settings-row-title">Ethereum Network Blocks</div>
                             <div class="settings-row-description">
-                                Number of latest Ethereum blocks indexed during each monitoring refresh.
+                                Number of latest Ethereum blocks indexed during each monitoring refresh
                             </div>
                         </div>
                         """,
@@ -14817,7 +14817,7 @@ def render_monitoring_controls_page(prefs):
                         <div class="settings-row-copy">
                             <div class="settings-row-title">Bitcoin Network Blocks</div>
                             <div class="settings-row-description">
-                                Number of latest Bitcoin blocks indexed during each monitoring refresh.
+                                Number of latest Bitcoin blocks indexed during each monitoring refresh
                             </div>
                         </div>
                         """,
@@ -14841,7 +14841,7 @@ def render_monitoring_controls_page(prefs):
                         <div class="settings-row-copy">
                             <div class="settings-row-title">Bitcoin Transactions Per Block</div>
                             <div class="settings-row-description">
-                                Maximum number of transactions sampled from each indexed Bitcoin block.
+                                Maximum number of transactions sampled from each indexed Bitcoin block
                             </div>
                         </div>
                         """,
