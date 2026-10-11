@@ -11317,6 +11317,73 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
     }
 }
 
+
+/* =========================================================
+   HOME LOWER CARDS — FILL AVAILABLE HEIGHT CLEANLY
+   ========================================================= */
+
+/*
+   Latest Transfers now displays 5 rows.
+   Fine-tune row height and spacing so the 660px left panel is
+   visually filled without leaving a large empty area at the bottom.
+*/
+.st-key-home_alerts_panel .alert-card {
+    min-height: 110px !important;
+    margin-bottom: 8px !important;
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+}
+
+/* Keep each transfer row compact enough for five cards. */
+.st-key-home_alerts_panel .alert-badges {
+    margin-top: 6px !important;
+}
+
+.st-key-home_alerts_panel .alert-title {
+    margin-bottom: 6px !important;
+}
+
+.st-key-home_alerts_panel .alert-sub {
+    margin-bottom: 6px !important;
+}
+
+/*
+   Market News stays at the existing 248px outer height so the
+   overall left/right baseline remains aligned, but the two news
+   items now use the full content area instead of leaving a blank
+   strip at the bottom.
+*/
+.st-key-home_news_preview_card {
+    height: 248px !important;
+    min-height: 248px !important;
+}
+
+.st-key-home_news_preview_card .home-news-grid {
+    height: 176px !important;
+    min-height: 176px !important;
+    align-items: stretch !important;
+}
+
+.st-key-home_news_preview_card .home-news-item {
+    height: 176px !important;
+    min-height: 176px !important;
+    align-items: center !important;
+}
+
+.st-key-home_news_preview_card .home-news-thumb,
+.st-key-home_news_preview_card .home-news-fallback {
+    width: 116px !important;
+    height: 102px !important;
+}
+
+/* Keep text vertically balanced inside the taller news rows. */
+.st-key-home_news_preview_card .home-news-copy {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-height: 102px !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -15792,7 +15859,7 @@ with main_col:
             if all_alerts_df.empty:
                 st.info("No transactions found in the current scan window.")
             else:
-                for _, row in all_alerts_df.head(4).iterrows():
+                for _, row in all_alerts_df.head(5).iterrows():
                     meta = get_asset_meta(row["asset_symbol"], row["chain"])
                     amount_txt = f"{format_amount(row['amount_native'])} {row['asset_symbol']}"
                     usd_txt = (
