@@ -11405,6 +11405,18 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
     }
 }
 
+
+/* =========================================================
+   WATCHLIST — CLEARER SECONDARY TEXT
+   Match the colour used by the PUBLIC ADDRESS LOOKUP subtitle.
+   ========================================================= */
+
+.wallet-network-hint,
+.wallet-empty-copy {
+    color: #9D968C !important;
+    opacity: 1 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
