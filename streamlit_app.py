@@ -13258,6 +13258,86 @@ def render_transaction_detail_page(
         f'</div>'
     )
     st.markdown(transfer_html, unsafe_allow_html=True)
+
+    # Explain the EXISTING stored risk result; do not recalculate or alter scoring.
+    explanation_parts = []
+    current_threshold = float(
+        st.session_state.monitoring_prefs.get("whale_threshold", WHALE_THRESHOLD_USD)
+    )
+    if pd.notna(amount_usd):
+        if current_threshold > 0:
+            threshold_ratio = float(amount_usd) / current_threshold
+            explanation_parts.append(
+                f"This transfer is valued at {usd_text}, approximately "
+                f"{threshold_ratio:.1f} times the currently configured whale "
+                f"threshold of ${current_threshold:,.0f}."
+            )
+        else:
+            explanation_parts.append(f"This transfer is valued at {usd_text}.")
+    else:
+        explanation_parts.append(
+            "A USD estimate was unavailable, so the score used the "
+            "system's unavailable-valuation baseline."
+        )
+
+    if source_type == "watchlist":
+        explanation_parts.append(
+            "Watchlist activity contributes an additional 0.08 to the base score."
+        )
+    if direction in ("inflow", "outflow"):
+        explanation_parts.append(
+            f"The recorded {direction} direction contributes an additional "
+            "0.04 to the base score."
+        )
+
+    def _stored_score(field):
+        try:
+            value = float(row.get(field))
+            return value if pd.notna(value) else None
+        except (TypeError, ValueError):
+            return None
+
+    base_score_value = _stored_score("base_score")
+    final_score_value = _stored_score("final_score")
+    if base_score_value is not None:
+        explanation_parts.append(
+            f"The stored heuristic base score is {base_score_value:.2f}."
+        )
+    if final_score_value is not None:
+        if (base_score_value is not None
+                and final_score_value > base_score_value + 0.000001):
+            explanation_parts.append(
+                f"Market-context fusion raised the score by "
+                f"{final_score_value - base_score_value:.2f}, "
+                f"giving a final score of {final_score_value:.2f}."
+            )
+        else:
+            explanation_parts.append(
+                f"The stored final score is {final_score_value:.2f}."
+            )
+        explanation_parts.append(
+            f"This falls within the {final_risk} risk category "
+            "(Low: below 0.48; Medium: 0.48 to below 0.78; "
+            "High: 0.78 or above)."
+        )
+    else:
+        explanation_parts.append(
+            f"The stored assessment classifies this transfer as {final_risk} risk."
+        )
+
+    explanation_text = " ".join(explanation_parts)
+    explanation_html = (
+        '<div class="tx-info-card">'
+        '<div class="tx-section-title">Risk Assessment Explanation</div>'
+        f'<div class="tx-detail-value" style="line-height:1.7;word-break:normal;">'
+        f'{_safe_html(explanation_text)}</div>'
+        '<div class="tx-detail-label" style="margin-top:12px;line-height:1.5;">'
+        'The threshold shown reflects current settings; stored scores were calculated '
+        'when the transaction was indexed. This is a monitoring indicator, not evidence '
+        'of fraud or a prediction of price movements.'
+        '</div></div>'
+    )
+    st.markdown(explanation_html, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 
