@@ -22,10 +22,7 @@ from sqlalchemy import create_engine, text
 env_path = Path(__file__).resolve().parent / ".env"
 env_vars = dict(dotenv_values(env_path))
 
-# Deployment-friendly secrets handling:
-# - Local development can continue using .env
-# - Streamlit Community Cloud can use its built-in Secrets panel
-# Cloud secrets override local .env values when both are present.
+# Load local .env settings, with Streamlit Secrets taking precedence.
 try:
     for _key in st.secrets.keys():
         _value = st.secrets[_key]
@@ -57,13 +54,8 @@ NETWORK_REFRESH_SECONDS = int((env_vars.get("NETWORK_REFRESH_SECONDS") or "120")
 MARKET_REFRESH_SECONDS = int((env_vars.get("MARKET_REFRESH_SECONDS") or "120").strip())
 NEWS_REFRESH_SECONDS = int((env_vars.get("NEWS_REFRESH_SECONDS") or "300").strip())
 
-# Final deployment mode:
-# - Automatically index the newest bounded block window once when a new
-#   browser session starts.
-# - During an active session, NOVARIS can re-check when Home is revisited
-#   after the freshness interval below.
-# - This is NOT background ingestion: no work runs while Streamlit is asleep
-#   and no polling thread is created.
+# Index recent blocks at session start or when Home needs a refresh.
+# Streamlit inactivity does not trigger background indexing.
 AUTO_INDEX_ON_SESSION_START = True
 AUTO_INDEX_REFRESH_SECONDS = int(
     (env_vars.get("AUTO_INDEX_REFRESH_SECONDS") or "600").strip()
@@ -11435,11 +11427,9 @@ div[data-testid="stElementContainer"]:has(.brand-title) {
 # =========================================================
 
 # =========================================================
-# PHASE 1 POSTGRESQL PERSISTENCE
+# POSTGRESQL DATABASE
 # =========================================================
-# The existing NOVARIS dashboard continues to use its current
-# DataFrame/session-state flow. Fresh blockchain scans are also
-# persisted to PostgreSQL so storage can be verified safely.
+# Stores indexed transactions, scan history and blockchain checkpoints.
 
 @st.cache_resource
 def get_db_engine():
@@ -11742,8 +11732,7 @@ def persist_network_snapshot(
 
         stored_count = save_transactions_to_db(df, scan_id)
 
-        # A scan becomes visible to Phase 2 readers only after every
-        # transaction upsert has completed successfully.
+        # Mark a scan successful only after all transactions are saved.
         with db_engine.begin() as connection:
             connection.execute(
                 text("""
@@ -12461,7 +12450,7 @@ def load_db_dashboard_window(eth_blocks=1, btc_blocks=4):
     if normalized is not None and not normalized.empty:
         return normalized
 
-    # Migration fallback for Phase 1/2 rows that predate block_number storage.
+    # Fallback for older records without block numbers.
     legacy_df, _ = load_latest_db_snapshot()
     return legacy_df
 
@@ -12892,7 +12881,6 @@ def render_fear_greed_index_card(fg):
         )
     )
 
-    # Large centre reading
     fig.add_annotation(
         x=0.50,
         y=0.25,
@@ -12907,7 +12895,6 @@ def render_fear_greed_index_card(fg):
         },
     )
 
-    # Classification below the number
     fig.add_annotation(
         x=0.50,
         y=0.12,
@@ -12980,10 +12967,7 @@ def render_fear_greed_index_card(fg):
             )
 
         with insight_col:
-            # Build the HTML without leading indentation.
-            # Streamlit Markdown can interpret indented HTML after blank lines
-            # as a Markdown code block, which is why the raw <div> tags were
-            # appearing in a white box.
+            # Avoid leading indentation so Streamlit renders HTML correctly.
             insight_html = (
                 f'<div class="fg-insight-panel">'
                 f'<div class="fg-insight-content">'
@@ -13158,8 +13142,7 @@ def render_transaction_detail_page(
         else f"https://www.blockchain.com/explorer/transactions/btc/{tx_hash}"
     )
 
-    # Use the exact same card composition as the Whale Alerts list:
-    # matching asset icon, amount/USD typography, route text, badges and age.
+    # Match the Whale Alerts card layout.
     whale_summary_html = (
         f'<div class="tx-whale-alert-summary">'
         f'<div class="alert-card whale-card">'
@@ -13259,7 +13242,7 @@ def render_transaction_detail_page(
     )
     st.markdown(transfer_html, unsafe_allow_html=True)
 
-    # Explain the EXISTING stored risk result; do not recalculate or alter scoring.
+    # Explain the stored risk score without changing its calculation.
     explanation_parts = []
     current_threshold = float(
         st.session_state.monitoring_prefs.get("whale_threshold", WHALE_THRESHOLD_USD)
@@ -13607,15 +13590,13 @@ def fetch_news_articles(query, api_key):
     if not search_query:
         search_query = "Bitcoin OR Ethereum OR cryptocurrency OR blockchain"
 
-    # 1. Use GNews when configured.
+    # Try GNews first, then RSS if no articles are returned.
     rows = fetch_from_gnews(search_query)
 
-    # 2. No API key / GNews error / zero results -> free RSS fallback.
     if not rows:
         rows = fetch_from_google_rss(search_query)
 
-    # 3. A very restrictive custom query can still produce no articles.
-    #    Retry automatically with a broad blockchain-news query.
+    # Retry with a broader query if the original search returns nothing.
     if not rows:
         broad_query = (
             "Bitcoin OR Ethereum OR cryptocurrency OR blockchain "
@@ -13762,10 +13743,7 @@ def render_market_page(prices, market_df: pd.DataFrame):
         },
     ]
 
-    # Build the COMPLETE table in one HTML block.
-    # Streamlit creates a separate DOM wrapper for every st.markdown call,
-    # so opening the shell in one call and adding rows in later calls caused
-    # the rows to escape the centred container and stretch across the page.
+    # Render the table in one HTML block to preserve the Streamlit layout.
     market_html = [
         '<div class="market-monitor-panel">',
         '<div class="market-monitor-topbar">',
@@ -14160,9 +14138,7 @@ def render_full_alerts_page(
             else ""
         )
 
-        # Keep each alert card as compact HTML with no leading indentation.
-        # Leading spaces in a multi-line string can be interpreted by Markdown
-        # as a code block, which is why later cards were appearing as raw HTML.
+        # Avoid leading indentation so cards render as HTML rather than code.
         card_html_parts.append(
             (
                 f'<div class="full-alert-card-shell">'
@@ -14954,18 +14930,15 @@ def render_monitoring_controls_page(prefs):
                 "btc_txs_per_block": int(btc_txs_per_block_input),
             }
 
-            # Save the updated preferences first.
             st.session_state.monitoring_prefs = new_prefs
 
-            # The display cache should be rebuilt after the new index pass.
+            # Rebuild the display cache after indexing.
             st.session_state.db_cache_loaded = False
 
-            # Refresh market-news data if the query was changed.
             if old_prefs.get("news_query") != new_prefs.get("news_query"):
                 st.session_state.force_news_refresh = True
 
-            # One action now does both jobs:
-            # Save Changes -> immediately run the latest blockchain index.
+            # Saving settings also starts a new blockchain index.
             st.session_state.force_network_refresh = True
             st.session_state.nav_view = "home"
             st.rerun()
@@ -14974,10 +14947,7 @@ def render_monitoring_controls_page(prefs):
 # =========================================================
 # SESSION RUNTIME STATE
 # =========================================================
-# Navigation is kept in Streamlit session state instead of query-string links.
-# Clicking the in-app navigation still causes Streamlit's normal lightweight
-# script rerun, but it no longer causes a browser URL/page reload and expensive
-# API calls are skipped while the stored snapshots are still fresh.
+# Keep navigation in session state and reuse cached data during page reruns.
 if "nav_view" not in st.session_state:
     st.session_state.nav_view = "home"
 
@@ -14991,7 +14961,7 @@ if "monitoring_prefs" not in st.session_state:
         "btc_txs_per_block": min(max(BTC_NETWORK_TXS_PER_BLOCK, 10), 50),
     }
 
-# Persistent market/news/network snapshots.
+# Cached market, news and network data for the current session.
 if "prices_data" not in st.session_state:
     st.session_state.prices_data = {
         "BTC": None,
@@ -15046,10 +15016,7 @@ if "force_network_refresh" not in st.session_state:
 if "force_news_refresh" not in st.session_state:
     st.session_state.force_news_refresh = False
 
-# Final indexed architecture: PostgreSQL is the persistent transaction store.
-# Lightweight DB/API snapshots are reused from session state so navigation does
-# not repeatedly hit blockchain APIs. Latest-block ingestion runs once on a new
-# session and later only when the Home freshness gate is due or manually forced.
+# Store transaction history in PostgreSQL and cache display data in session state.
 if "session_bootstrap_complete" not in st.session_state:
     st.session_state.session_bootstrap_complete = False
 if "session_index_attempted" not in st.session_state:
@@ -15334,9 +15301,7 @@ with main_col:
 # =========================================================
 # FINAL INDEXED DATA FLOW — AUTO-LATEST + FAST NAVIGATION
 # =========================================================
-# A bounded blockchain index pass occurs at session start and later only when
-# the Home freshness gate is due (or the user manually refreshes). Normal page
-# switching continues to reuse session/DB snapshots for fast navigation.
+# Normal page navigation reuses cached data without starting a blockchain scan.
 selected_tx_hash = st.query_params.get("tx", "")
 if isinstance(selected_tx_hash, list):
     selected_tx_hash = selected_tx_hash[0] if selected_tx_hash else ""
@@ -15351,16 +15316,14 @@ if selected_detail_kind not in {"whale", "transfer"}:
 
 now_ts = time.time()
 
-# Idempotent schema upgrade. Cached at the Streamlit-process level by state.
+# Run the database schema check once per application session.
 if "final_schema_ready" not in st.session_state:
     st.session_state.final_schema_ready = ensure_final_index_schema()
 
 # ---------------------------------------------------------
 # ONE-TIME SESSION BOOTSTRAP FOR SMALL EXTERNAL DATA
 # ---------------------------------------------------------
-# We deliberately preload all dashboard context once so Market/News/Home can
-# switch instantly afterwards. A browser/app restart creates a new session and
-# therefore gets a fresh snapshot.
+# Load dashboard context once per session for faster navigation.
 if not st.session_state.session_bootstrap_complete:
     try:
         st.session_state.prices_data = fetch_price_map()
@@ -15455,9 +15418,7 @@ if should_index_now:
         eth_from, eth_to, eth_gap_warning = choose_index_range(
             eth_tip, eth_last, eth_blocks, CHAIN_ETH
         )
-        # Expected Streamlit sleep-gap behaviour: do not show this as a
-        # warning. NOVARIS intentionally indexes only the newest configured
-        # block window after an inactive period.
+        # Inactive-period gaps are expected and do not need warnings.
         if eth_gap_warning:
             pass
         index_meta["eth_from"] = eth_from
@@ -15472,9 +15433,6 @@ if should_index_now:
         btc_from, btc_to, btc_gap_warning = choose_index_range(
             btc_tip, btc_last, btc_blocks, CHAIN_BTC
         )
-        # Expected Streamlit sleep-gap behaviour: do not show this as a
-        # warning. NOVARIS intentionally indexes only the newest configured
-        # block window after an inactive period.
         if btc_gap_warning:
             pass
         index_meta["btc_from"] = btc_from
@@ -16126,9 +16084,7 @@ with main_col:
                 # period from making the timeline look stale.
                 now_local = pd.Timestamp.now(tz=dashboard_tz)
 
-                # Use completed hours for the hourly view. Example: at 11:37 PM,
-                # the default view ends at 10:59:59 PM and displays hourly ticks
-                # such as 10 PM, 9 PM, 8 PM, 7 PM, 6 PM, etc.
+                # Show completed hours rather than the current partial hour.
                 current_hour = now_local.floor("h")
                 completed_hour_end = current_hour - pd.Timedelta(microseconds=1)
 
@@ -16238,7 +16194,6 @@ with main_col:
                         title="",
                         type="date",
 
-                        # 1H is the DEFAULT view.
                         range=[view_1h_start, view_1h_end],
                         dtick=60 * 60 * 1000,
                         tick0=view_1h_start.ceil("h"),
@@ -16259,7 +16214,6 @@ with main_col:
                         automargin=True,
                     ),
                     updatemenus=[
-                        # 1H — selected by default.
                         dict(
                             type="buttons",
                             direction="left",
@@ -16285,7 +16239,6 @@ with main_col:
                                 family='Inter, "Segoe UI", Arial, sans-serif',
                             ),
                         ),
-                        # 6H
                         dict(
                             type="buttons",
                             direction="left",
@@ -16311,7 +16264,6 @@ with main_col:
                                 family='Inter, "Segoe UI", Arial, sans-serif',
                             ),
                         ),
-                        # 24H
                         dict(
                             type="buttons",
                             direction="left",
